@@ -1,1 +1,20 @@
-STORE PAGE
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Сторінка Магазину</title>
+</head>
+<body>
+    <h1>Доступні Автомобілі</h1>
+    <ul>
+        {% for car in cars %}
+            <li>
+                <strong>{{ car.make }} {{ car.model }}</strong><br>
+                <em>Рік випуску: {{ car.year }}</em><br>
+                <p>Ціна: ${{ car.price }}</p>
+            </li>
+        {% empty %}
+            <p>На даний момент немає доступних автомобілів.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>
