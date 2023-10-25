@@ -8,10 +8,14 @@
     <ul>
         {% for car in cars %}
             <li>
-                <strong>{{ car.make }} {{ car.model }}</strong><br>
+                <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
                 <em>Рік випуску: {{ car.year }}</em><br>
-                <p>Ціна: ${{ car.price }}</p>
+                <em>Колір: {{ car.color }}</em><br>
+                <em>Ціна: ${{ car.car_type.price }}</em>
+                <p></p>
             </li>
+            <input type="submit" name="buy_car" value="Я купую!">
+            <p></p>
         {% empty %}
             <p>На даний момент немає доступних автомобілів.</p>
         {% endfor %}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Dealership</title>
+</head>
+<body>
+    <h1>All Dealership</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Dealer</th>
+                <th>Car Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealer in dealer %}
+                <tr>
+                    <td>{{ dealer.name }}</td>
+                    <td>{{ dealer }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
