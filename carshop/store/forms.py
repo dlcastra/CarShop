@@ -118,7 +118,7 @@ class CarForm(forms.ModelForm):
 class DealershipForm(forms.ModelForm):
     class Meta:
         model = Dealership
-        fields = ['name', 'available_car_types']
+        fields = ["name", "available_car_types"]
         labels = {"name": "Дилерство"}
 
     def clean_name(self):
