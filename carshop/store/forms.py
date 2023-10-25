@@ -1,8 +1,8 @@
-from django import forms
-
 import phonenumbers
 
-from store.models import Client, CarType, Car
+from django import forms
+
+from store.models import Client, CarType, Car, Dealership
 
 
 class ClientForm(forms.ModelForm):
@@ -85,14 +85,6 @@ class CarTypeForm(forms.ModelForm):
             )
         return brand
 
-    # def clean_price(self):
-    #     price = self.cleaned_data["price"]
-    #     if any(char.isalpha() for char in price):
-    #         raise forms.ValidationError(
-    #             "The price should not have a letter /Ціна не повинна мати літери"
-    #         )
-    #     return price
-
 
 class CarForm(forms.ModelForm):
     class Meta:
@@ -115,13 +107,24 @@ class CarForm(forms.ModelForm):
 
     def clean_year(self):
         year = self.cleaned_data["year"]
-        if len(year) < 4:
+        if len(str(year)) < 4:
             raise forms.ValidationError(
                 "Specify the full year of manufacture of the car/Вкажіть повний рік випуску авто "
             )
 
-        if any(char.isalpha() for char in year):
-            raise forms.ValidationError(
-                "The year should not have a letter /Рік випуску не повинен мати літери"
-            )
         return year
+
+
+class DealershipForm(forms.ModelForm):
+    class Meta:
+        model = Dealership
+        fields = ['name', 'available_car_types']
+        labels = {"name": "Дилерство"}
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if len(name) > 50:
+            raise forms.ValidationError(
+                "Name is too long, max length is 50/Назва занадто вилекa, максимальна довжина 50"
+            )
+        return name
