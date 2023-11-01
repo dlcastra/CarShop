@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>All Dealership</title>
+    <title>Дилери та автомобілі</title>
 </head>
 <body>
-    <h1>All Dealership</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Dealer</th>
-                <th>Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for dealer in dealer %}
-                <tr>
-                    <td>{{ dealer.name }}</td>
-                    <td>{{ dealer.available_car_types.count }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h1>Список Дилерів</h1>
+    <ul>
+        {% for dealer in dealer %}
+            <li>
+                <strong>{{ dealer.name }}</strong><br>
+                <em>Доступні Автомобілі:</em>
+                <ul>
+                    {% for car in dealer.available_car_types.all %}
+                        <li>
+                            {{ car.brand }} {{ car.name }}<br>
+                            <em>Ціна: ${{ car.price }}</em>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <p></p>
+        {% empty %}
+            <p>Наразі немає доступних дилерів.</p>
+        {% endfor %}
+    </ul>
 </body>
 </html>

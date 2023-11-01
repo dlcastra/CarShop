@@ -1,14 +1,9 @@
-from django.shortcuts import render, reverse, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 
 from store.forms import ClientForm, CarTypeForm, CarForm, DealershipForm
-from store.models import Car, CarType, Dealership
+from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 
 """ --- CLIENT PART --- """
-
-
-def home_page(request):
-    dealers = Dealership.objects.all()
-    return render(request, "home_page.html", {"dealer": dealers})
 
 
 def register_client(request):
@@ -25,12 +20,61 @@ def register_client(request):
 
 
 def redirect_on_store_page(request):
-    car_list = Car.objects.all()
+    car_list = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
     return render(request, "store_page.html", {"cars": car_list})
 
 
-def sell_car(request):
-    ...
+def create_order(request, pk):
+    car = get_object_or_404(Car, pk=pk)
+    if car.blocked_by_order or car.owner:
+        return redirect("redirect_on_store_page")
+
+    if request.method == "POST":
+        client = Client.objects.first()
+        order, created = Order.objects.get_or_create(
+            client=client, dealership=car.car_type.dealerships.first(), is_paid=False
+        )
+        car_type = car.car_type
+        order_quantity, type = OrderQuantity.objects.get_or_create(
+            order=order, car_type=car_type
+        )
+        car.block(order)
+    return redirect("redirect_on_store_page")
+
+
+def view_cart(request):
+    client = Client.objects.first()
+    order = Order.objects.filter(client=client, is_paid=False).first()
+    user_cars = Car.objects.filter(blocked_by_order=order)
+
+    return render(request, "cart_page.html", {"user_cars": user_cars, "order": order})
+
+
+def pay_order(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+
+    if not order.is_paid:
+        client = Client.objects.first()
+        cars = Car.objects.filter(blocked_by_order=order)
+        for car in cars:
+            car.sell()
+            car.owner = client
+            car.save()
+        order.is_paid = True
+        order.save()
+
+        return render(request,"order_success.html")
+
+
+def cancel_order(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+
+    cars = Car.objects.filter(blocked_by_order=order)
+    for car in cars:
+        car.unblock()
+    order.delete()
+
+    return render(request, "order_cancel.html")
 
 
 """ --- STAFF PART --- """

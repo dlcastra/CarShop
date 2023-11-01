@@ -3,10 +3,13 @@ from django.urls import path
 from store import views
 
 urlpatterns = [
-    path("", views.home_page, name="home_page"),
-    path("registration/", views.register_client, name="register_client"),
-    path("store/", views.redirect_on_store_page, name="redirect_on_store_page"),
+    path("", views.redirect_on_store_page, name="redirect_on_store_page"),
+    path("create_order/<int:pk>/", views.create_order, name="create_order"),
+    path("cart/", views.view_cart, name="view_cart"),
+    path("pay_order/<int:pk>", views.pay_order, name="pay_order"),
+    path("cancel_order/<int:pk>", views.cancel_order, name="cancel_order"),
     # ADD
+    path("registration/", views.register_client, name="register_client"),
     path(
         "for-staff-only/add-new-car-type/",
         views.add_new_car_type,

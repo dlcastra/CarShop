@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Сторінка корзини</title>
+</head>
+<body>
+    <h1>Ваша корзина</h1>
+    <ul>
+        {% for car in user_cars %}
+            <li>
+                <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
+                <em>Рік випуску: {{ car.year }}</em><br>
+                <em>Ціна: ${{ car.car_type.price }}</em><br>
+                <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+            </li>
+        {% empty %}
+            <p>Ваша корзина порожня.</p>
+        {% endfor %}
+    </ul>
+    <li><a href="{% url 'pay_order' order.id %}">Сплатити</a></li>
+    <li><a href="{% url 'cancel_order' order.id %}">Відмінити замовлення</a></li>>
+</body>
+</html>

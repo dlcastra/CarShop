@@ -4,21 +4,27 @@
     <title>Сторінка Магазину</title>
 </head>
 <body>
-    <h1>Доступні Автомобілі</h1>
-    <ul>
-        {% for car in cars %}
-            <li>
-                <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
-                <em>Рік випуску: {{ car.year }}</em><br>
-                <em>Колір: {{ car.color }}</em><br>
-                <em>Ціна: ${{ car.car_type.price }}</em>
-                <p></p>
-            </li>
-            <input type="submit" name="buy_car" value="Я купую!">
+<h1>Доступні Автомобілі</h1>
+<ul>
+    {% for car in cars %}
+        <li>
+            <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
+            <em>Рік випуску: {{ car.year }}</em><br>
+            <em>Колір: {{ car.color }}</em><br>
+            <em>Ціна: ${{ car.car_type.price }}</em><br>
+            <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+            {% csrf_token %}
             <p></p>
+            <form method="POST" action="{% url 'create_order' car.id %}">
+                {% csrf_token %}
+                <input type="submit" name="buy_car" value="Купити">
+            </form>
+
+            <p></p>
+        </li>
         {% empty %}
-            <p>На даний момент немає доступних автомобілів.</p>
-        {% endfor %}
-    </ul>
+        <p>На даний момент немає доступних автомобілів.</p>
+    {% endfor %}
+</ul>
 </body>
 </html>
