@@ -9,14 +9,14 @@
         <thead>
             <tr>
                 <th>Dealer</th>
-                <th>Car Type</th>
+                <th>Quantity</th>
             </tr>
         </thead>
         <tbody>
             {% for dealer in dealer %}
                 <tr>
                     <td>{{ dealer.name }}</td>
-                    <td>{{ dealer }}</td>
+                    <td>{{ dealer.available_car_types.count }}</td>
                 </tr>
             {% endfor %}
         </tbody>

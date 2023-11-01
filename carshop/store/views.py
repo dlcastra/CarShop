@@ -1,9 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, reverse, redirect, get_object_or_404
 
 from store.forms import ClientForm, CarTypeForm, CarForm, DealershipForm
 from store.models import Car, CarType, Dealership
 
 """ --- CLIENT PART --- """
+
+
+def home_page(request):
+    dealers = Dealership.objects.all()
+    return render(request, "home_page.html", {"dealer": dealers})
 
 
 def register_client(request):
@@ -73,8 +78,9 @@ def add_dealership(request):
 
 # GET METHODS
 def get_all_types_of_cars(request):
-    car_type_list = CarType.objects.all()
-    return render(request, "all_types_of_cars.html", {"car_type": car_type_list})
+    if request.method == "GET":
+        car_type_list = CarType.objects.all()
+        return render(request, "all_types_of_cars.html", {"car_type": car_type_list})
 
 
 def get_all_cars(request):
