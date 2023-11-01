@@ -35,17 +35,19 @@ def create_order(request, pk):
             client=client, dealership=car.car_type.dealerships.first(), is_paid=False
         )
         car_type = car.car_type
-        order_quantity, type = OrderQuantity.objects.get_or_create(
+        order_quantity, _ = OrderQuantity.objects.get_or_create(
             order=order, car_type=car_type
         )
         car.block(order)
+        client.order_cart.add(car)
+
     return redirect("redirect_on_store_page")
 
 
 def view_cart(request):
     client = Client.objects.first()
+    user_cars = client.order_cart.all()
     order = Order.objects.filter(client=client, is_paid=False).first()
-    user_cars = Car.objects.filter(blocked_by_order=order)
 
     return render(request, "cart_page.html", {"user_cars": user_cars, "order": order})
 
@@ -62,8 +64,9 @@ def pay_order(request, pk):
             car.save()
         order.is_paid = True
         order.save()
+        client.order_cart.clear()
 
-        return render(request,"order_success.html")
+        return render(request, "order_success.html")
 
 
 def cancel_order(request, pk):

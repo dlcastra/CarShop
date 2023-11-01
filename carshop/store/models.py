@@ -5,6 +5,7 @@ class Client(models.Model):
     name = models.CharField(max_length=50)
     email = models.EmailField(max_length=254)
     phone = models.CharField(max_length=20)
+    order_cart = models.ManyToManyField("Car")
 
     def __str__(self):
         return self.name

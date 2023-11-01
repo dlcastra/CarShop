@@ -17,7 +17,10 @@
             <p>Ваша корзина порожня.</p>
         {% endfor %}
     </ul>
-    <li><a href="{% url 'pay_order' order.id %}">Сплатити</a></li>
-    <li><a href="{% url 'cancel_order' order.id %}">Відмінити замовлення</a></li>>
+
+    {% if order.id %}
+        <li><a href="{% url 'pay_order' order.id %}">Сплатити</a></li>
+        <li><a href="{% url 'cancel_order' order.id %}">Відмінити замовлення</a></li>
+    {% endif %}
 </body>
 </html>
