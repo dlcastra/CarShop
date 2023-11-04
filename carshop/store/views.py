@@ -8,7 +8,7 @@ from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 
 def register_client(request):
     if request.method == "GET":
-        form = ClientForm
+        form = ClientForm()
         return render(request, "add_client.html", {"client": form})
 
     form = ClientForm(request.POST)
@@ -86,7 +86,7 @@ def cancel_order(request, pk):
 # ADD METHODS
 def add_new_car_type(request):
     if request.method == "GET":
-        form = CarTypeForm
+        form = CarTypeForm()
         return render(request, "add_car_type.html", {"car_type": form})
 
     form = CarTypeForm(request.POST)
@@ -112,7 +112,7 @@ def add_new_car(request):
 
 def add_dealership(request):
     if request.method == "GET":
-        form = DealershipForm
+        form = DealershipForm()
         return render(request, "add_dealership.html", {"dealer": form})
 
     form = DealershipForm(request.POST)
