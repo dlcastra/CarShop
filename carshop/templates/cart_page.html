@@ -3,7 +3,10 @@
 <head>
     <title>Сторінка корзини</title>
 </head>
-<body>
+<body style="background-color: #80cbc4; color: #1E1E1E">
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
     <h1>Ваша корзина</h1>
     <ul>
         {% for car in user_cars %}
