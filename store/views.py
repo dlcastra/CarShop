@@ -1,12 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
-from store.forms import ClientForm, CarTypeForm, CarForm, DealershipForm
+from store.forms import (
+    ClientForm,
+    CarTypeForm,
+    CarForm,
+    DealershipForm,
+    UserCreationFormWithEmail,
+)
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 
 """ --- CLIENT PART --- """
 
 
-def register_client(request):
+def create_client(request):
     if request.method == "GET":
         form = ClientForm()
         return render(request, "add_client.html", {"client": form})
@@ -18,6 +24,24 @@ def register_client(request):
 
     return render(request, "add_client.html", {"client": form})
 
+
+def register_view(request):
+    if request.method == "GET":
+        form = UserCreationFormWithEmail()
+        return render(request, "register.html", {"form": form})
+
+    form = UserCreationFormWithEmail(request.POST)
+    if form.is_valid():
+        # form.instance.is_active = False
+        form.save()
+        return redirect("login_view")
+
+    return render(request, "register.html", {"form": form})
+
+
+# def login_view(request):
+#     # return render(request, "login.html")
+#     return redirect("redirect_on_store_page")
 
 def redirect_on_store_page(request):
     car_list = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
