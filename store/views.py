@@ -43,6 +43,7 @@ def register_view(request):
 #     # return render(request, "login.html")
 #     return redirect("redirect_on_store_page")
 
+
 def redirect_on_store_page(request):
     car_list = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
     return render(request, "store_page.html", {"cars": car_list})
