@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
+from carshop.settings import EMAIL_HOST_PASSWORD
 from store.forms import (
     ClientForm,
     CarTypeForm,
@@ -34,7 +35,7 @@ def create_client(request):
 def send_simple_message(request, user: User):
     return requests.post(
         "https://api.mailgun.net/v3/sandbox48b302f48d514737b3887d286274882b.mailgun.org/messages",
-        auth=("api", "f1fa0c04f67fa8e2498d937c715140b0-5d2b1caa-b5e118bf"),
+        auth=("api", EMAIL_HOST_PASSWORD),
         data={
             "from": "Excited User <mailgun@sandbox48b302f48d514737b3887d286274882b.mailgun.org>",
             "to": [user.email],

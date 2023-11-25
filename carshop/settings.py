@@ -179,7 +179,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/store-page/"
 LOGIN_URL = "/login/"
 
-EMAIL_HOST = "smtp.mailgun.org"  # os.environ.get('MAILGUN_SMTP_SERVER', '')
-EMAIL_PORT = "587"  # os.environ.get('MAILGUN_SMTP_PORT', '')
-EMAIL_HOST_USER = "postmaster@sandbox48b302f48d514737b3887d286274882b.mailgun.org"  # os.environ.get('MAILGUN_SMTP_LOGIN', '')
-EMAIL_HOST_PASSWORD = "f1fa0c04f67fa8e2498d937c715140b0-5d2b1caa-b5e118bf"  # os.environ.get('MAILGUN_SMTP_PASSWORD', '')
+EMAIL_HOST = os.environ.get('MAILGUN_SMTP_SERVER', '')
+EMAIL_PORT = os.environ.get('MAILGUN_SMTP_PORT', '')
+EMAIL_HOST_USER = os.environ.get('MAILGUN_SMTP_LOGIN', '')
+EMAIL_HOST_PASSWORD = os.environ.get('MAILGUN_SMTP_PASSWORD', '')
