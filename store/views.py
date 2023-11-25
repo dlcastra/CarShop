@@ -1,3 +1,9 @@
+import requests
+
+from django.contrib.auth.models import User
+
+# from django.core.mail import send_mail
+from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
 from store.forms import (
@@ -25,23 +31,46 @@ def create_client(request):
     return render(request, "add_client.html", {"client": form})
 
 
+def send_simple_message(request, user: User):
+    return requests.post(
+        "https://api.mailgun.net/v3/sandbox48b302f48d514737b3887d286274882b.mailgun.org/messages",
+        auth=("api", "f1fa0c04f67fa8e2498d937c715140b0-5d2b1caa-b5e118bf"),
+        data={
+            "from": "Excited User <mailgun@sandbox48b302f48d514737b3887d286274882b.mailgun.org>",
+            "to": [user.email],
+            "subject": "Hello",
+            "text": "Testing some Mailgun awesomeness!",
+        },
+    )
+
+
 def register_view(request):
     if request.method == "GET":
         form = UserCreationFormWithEmail()
-        return render(request, "register.html", {"form": form})
+        return render(request, "registration/register.html", {"form": form})
 
     form = UserCreationFormWithEmail(request.POST)
     if form.is_valid():
-        # form.instance.is_active = False
+        form.instance.is_active = False
         form.save()
+        send_simple_message(request, form.instance)
         return redirect("login_view")
 
-    return render(request, "register.html", {"form": form})
+    return render(request, "registration/register.html", {"form": form})
 
 
-# def login_view(request):
-#     # return render(request, "login.html")
-#     return redirect("redirect_on_store_page")
+def activate(request, user_signed):
+    try:
+        user_id = Signer().unsign(user_signed)
+    except BadSignature:
+        return redirect("login_view")
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect("login_view")
+    user.is_active = True
+    user.save()
+    return redirect("login_view")
 
 
 def redirect_on_store_page(request):
