@@ -32,19 +32,6 @@ def create_client(request):
     return render(request, "add_client.html", {"client": form})
 
 
-def send_simple_message(request, user: User):
-    return requests.post(
-        "https://api.mailgun.net/v3/sandbox48b302f48d514737b3887d286274882b.mailgun.org/messages",
-        auth=("api", EMAIL_HOST_PASSWORD),
-        data={
-            "from": "Excited User <mailgun@sandbox48b302f48d514737b3887d286274882b.mailgun.org>",
-            "to": [user.email],
-            "subject": "Hello",
-            "text": "Testing some Mailgun awesomeness!",
-        },
-    )
-
-
 def register_view(request):
     if request.method == "GET":
         form = UserCreationFormWithEmail()
@@ -52,26 +39,10 @@ def register_view(request):
 
     form = UserCreationFormWithEmail(request.POST)
     if form.is_valid():
-        form.instance.is_active = False
         form.save()
-        send_simple_message(request, form.instance)
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
-
-
-def activate(request, user_signed):
-    try:
-        user_id = Signer().unsign(user_signed)
-    except BadSignature:
-        return redirect("login_view")
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return redirect("login_view")
-    user.is_active = True
-    user.save()
-    return redirect("login_view")
 
 
 def redirect_on_store_page(request):
