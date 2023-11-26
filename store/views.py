@@ -1,12 +1,25 @@
+import requests
+
+from django.contrib.auth.models import User
+
+# from django.core.mail import send_mail
+from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
-from store.forms import ClientForm, CarTypeForm, CarForm, DealershipForm
+from carshop.settings import EMAIL_HOST_PASSWORD
+from store.forms import (
+    ClientForm,
+    CarTypeForm,
+    CarForm,
+    DealershipForm,
+    UserCreationFormWithEmail,
+)
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 
 """ --- CLIENT PART --- """
 
 
-def register_client(request):
+def create_client(request):
     if request.method == "GET":
         form = ClientForm()
         return render(request, "add_client.html", {"client": form})
@@ -17,6 +30,48 @@ def register_client(request):
         return redirect("redirect_on_store_page")
 
     return render(request, "add_client.html", {"client": form})
+
+
+def send_simple_message(request, user: User):
+    return requests.post(
+        "https://api.mailgun.net/v3/sandbox48b302f48d514737b3887d286274882b.mailgun.org/messages",
+        auth=("api", EMAIL_HOST_PASSWORD),
+        data={
+            "from": "Excited User <mailgun@sandbox48b302f48d514737b3887d286274882b.mailgun.org>",
+            "to": [user.email],
+            "subject": "Hello",
+            "text": "Testing some Mailgun awesomeness!",
+        },
+    )
+
+
+def register_view(request):
+    if request.method == "GET":
+        form = UserCreationFormWithEmail()
+        return render(request, "registration/register.html", {"form": form})
+
+    form = UserCreationFormWithEmail(request.POST)
+    if form.is_valid():
+        form.instance.is_active = False
+        form.save()
+        send_simple_message(request, form.instance)
+        return redirect("login_view")
+
+    return render(request, "registration/register.html", {"form": form})
+
+
+def activate(request, user_signed):
+    try:
+        user_id = Signer().unsign(user_signed)
+    except BadSignature:
+        return redirect("login_view")
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect("login_view")
+    user.is_active = True
+    user.save()
+    return redirect("login_view")
 
 
 def redirect_on_store_page(request):
