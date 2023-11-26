@@ -193,3 +193,4 @@ def get_all_cars(request):
 def get_all_dealership(request):
     dealership_list = Dealership.objects.all()
     return render(request, "all_dealers.html", {"dealer": dealership_list})
+

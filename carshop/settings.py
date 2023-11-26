@@ -183,3 +183,4 @@ EMAIL_HOST = os.environ.get("MAILGUN_SMTP_SERVER", "")
 EMAIL_PORT = os.environ.get("MAILGUN_SMTP_PORT", "")
 EMAIL_HOST_USER = os.environ.get("MAILGUN_SMTP_LOGIN", "")
 EMAIL_HOST_PASSWORD = os.environ.get("MAILGUN_SMTP_PASSWORD", "")
+
