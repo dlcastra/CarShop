@@ -31,7 +31,7 @@ def create_client(request):
 
     return render(request, "add_client.html", {"client": form})
 
-
+# TODO: Виправити проблеми з надсиланням листів на пошту
 def send_simple_message(request, user: User):
     return requests.post(
         "https://api.mailgun.net/v3/sandbox48b302f48d514737b3887d286274882b.mailgun.org/messages",
