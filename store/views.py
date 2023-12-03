@@ -102,7 +102,9 @@ def view_cart(request):
         client = Client.objects.first()
         user_cars = client.order_cart.all()
         order = Order.objects.filter(client=client, is_paid=False).first()
-        return render(request, "cart_page.html", {"user_cars": user_cars, "order": order})
+        return render(
+            request, "cart_page.html", {"user_cars": user_cars, "order": order}
+        )
 
 
 def pay_order(request, pk):
