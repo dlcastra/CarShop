@@ -1,12 +1,9 @@
-import requests
-
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 
-# from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
-from carshop.settings import EMAIL_HOST_PASSWORD
 from store.forms import (
     ClientForm,
     CarTypeForm,
@@ -31,17 +28,16 @@ def create_client(request):
 
     return render(request, "add_client.html", {"client": form})
 
-# TODO: Виправити проблеми з надсиланням листів на пошту
-def send_simple_message(request, user: User):
-    return requests.post(
-        "https://api.mailgun.net/v3/sandbox48b302f48d514737b3887d286274882b.mailgun.org/messages",
-        auth=("api", EMAIL_HOST_PASSWORD),
-        data={
-            "from": "Excited User <mailgun@sandbox48b302f48d514737b3887d286274882b.mailgun.org>",
-            "to": [user.email],
-            "subject": "Hello",
-            "text": "Testing some Mailgun awesomeness!",
-        },
+
+def send_activation_email(request, user: User):
+    user_signed = Signer().sign(user.id)
+    signed_url = request.build_absolute_uri(f"/activate/{user_signed}")
+    send_mail(
+        "Registration complete",
+        "Click here to activate your account: " + signed_url,
+        "1dlcastra@gmail.com",
+        [user.email],
+        fail_silently=False,
     )
 
 
@@ -54,7 +50,7 @@ def register_view(request):
     if form.is_valid():
         form.instance.is_active = False
         form.save()
-        send_simple_message(request, form.instance)
+        send_activation_email(request, form.instance)
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
@@ -100,37 +96,49 @@ def create_order(request, pk):
 
 
 def view_cart(request):
-    client = Client.objects.first()
-    user_cars = client.order_cart.all()
-    order = Order.objects.filter(client=client, is_paid=False).first()
-
-    return render(request, "cart_page.html", {"user_cars": user_cars, "order": order})
+    if request.method == "GET":
+        return redirect(redirect_on_store_page)
+    if request.method == "POST":
+        client = Client.objects.first()
+        user_cars = client.order_cart.all()
+        order = Order.objects.filter(client=client, is_paid=False).first()
+        return render(request, "cart_page.html", {"user_cars": user_cars, "order": order})
 
 
 def pay_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
-    if not order.is_paid:
-        client = Client.objects.first()
-        cars = Car.objects.filter(blocked_by_order=order)
-        for car in cars:
-            car.sell()
-            car.owner = client
-            car.save()
-        order.is_paid = True
-        order.save()
-        client.order_cart.clear()
+    if request.method == "GET":
+        return render(request, "order_success.html")
 
+    if request.method == "POST":
+        if not order.is_paid:
+            client = Client.objects.first()
+            cars = Car.objects.filter(blocked_by_order=order)
+            for car in cars:
+                car.sell()
+                car.owner = client
+                car.save()
+            order.is_paid = True
+            order.save()
+            client.order_cart.clear()
+
+            return render(request, "order_success.html")
         return render(request, "order_success.html")
 
 
 def cancel_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
+    if request.method == "GET":
+        return render(request, "order_cancel.html")
 
-    cars = Car.objects.filter(blocked_by_order=order)
-    for car in cars:
-        car.unblock()
-    order.delete()
+    if request.method == "POST":
+        cars = Car.objects.filter(blocked_by_order=order)
+        for car in cars:
+            car.unblock()
+        order.delete()
+
+        return render(request, "order_cancel.html")
 
     return render(request, "order_cancel.html")
 
