@@ -3,27 +3,43 @@
 <head>
     <title>Сторінка корзини</title>
 </head>
-<body style="background-color: #80cbc4; color: #1E1E1E">
+<body style="background-color: #508bfc; color: #1E1E1E">
 {% load bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
-    <h1>Ваша корзина</h1>
-    <ul>
-        {% for car in user_cars %}
-            <li>
-                <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
-                <em>Рік випуску: {{ car.year }}</em><br>
-                <em>Ціна: ${{ car.car_type.price }}</em><br>
-                <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
-            </li>
+<h1>Ваша корзина</h1>
+<ul>
+    {% for car in user_cars %}
+        <li>
+            <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
+            <em>Рік випуску: {{ car.year }}</em><br>
+            <em>Ціна: ${{ car.car_type.price }}</em><br>
+            <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+        </li>
         {% empty %}
-            <p>Ваша корзина порожня.</p>
-        {% endfor %}
-    </ul>
+        <p>Ваша корзина порожня.</p>
+    {% endfor %}
+</ul>
 
-    {% if order.id %}
-        <li><a href="{% url 'pay_order' order.id %}">Сплатити</a></li>
-        <li><a href="{% url 'cancel_order' order.id %}">Відмінити замовлення</a></li>
-    {% endif %}
+{% if order.id %}
+    <form method="POST" action="{% url 'pay_order' order.id %}">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-success" name="redirect_on_store_page" value="Сплатити">
+    </form>
+    <p></p>
+    <form method="POST" action="{% url 'cancel_order' order.id %}">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-danger" name="redirect_on_store_page" value="Відмінити замовлення">
+    </form>
+    <p></p>
+
+{% endif %}
+
+<form method="GET" action="{% url 'view_cart' %}">
+    {% csrf_token %}
+    {% buttons %}
+        <input type="submit" class="btn btn-light" name="redirect_on_store_page" value="Назад">
+    {% endbuttons %}
+</form>
 </body>
 </html>
