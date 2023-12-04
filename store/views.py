@@ -128,6 +128,7 @@ def cancel_order(request, pk):
 
     return render(request, "order_cancel.html")
 
+
 """ --- STAFF PART --- """
 
 
