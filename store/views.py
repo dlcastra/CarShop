@@ -47,6 +47,7 @@ def register_view(request):
 
     form = UserCreationFormWithEmail(request.POST)
     if form.is_valid():
+        form.instance.is_active = False
         form.save()
         send_activation_email(request, form.instance)
         return redirect("login_view")
