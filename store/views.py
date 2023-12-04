@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from django.core.signing import Signer, BadSignature
+from django.core.signing import Signer
 from django.shortcuts import render, redirect, get_object_or_404
 
 from store.forms import (
@@ -127,6 +127,7 @@ def cancel_order(request, pk):
         return render(request, "order_cancel.html")
 
     return render(request, "order_cancel.html")
+
 
 """ --- STAFF PART --- """
 
