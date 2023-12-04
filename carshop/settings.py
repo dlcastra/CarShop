@@ -184,5 +184,3 @@ EMAIL_BACKEND = "django_mailjet.backends.MailjetBackend"
 MAILJET_API_KEY = "c2017c2bfb85160044b87829207d4b0f"
 MAILJET_API_SECRET = os.environ.get("MAILJET_API_SECRET")
 DEFAULT_FROM_EMAIL = "1dlcastra@gmail.com"
-
-# $Env:MAILJET_API_SECRET="d16656f7c40576d9241f6f8a674119d8"
