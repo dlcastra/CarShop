@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -29,7 +28,6 @@ def create_client(request):
     return render(request, "add_client.html", {"client": form})
 
 
-# Send auth link
 def send_activation_email(request, user: User):
     user_signed = Signer().sign(user.id)
     signed_url = request.build_absolute_uri(f"/activate/{user_signed}")
@@ -49,26 +47,11 @@ def register_view(request):
 
     form = UserCreationFormWithEmail(request.POST)
     if form.is_valid():
-        form.instance.is_active = False
         form.save()
         send_activation_email(request, form.instance)
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
-
-
-def activate(request, user_signed):
-    try:
-        user_id = Signer().unsign(user_signed)
-    except BadSignature:
-        return redirect("login_view")
-    try:
-        user = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        return redirect("login_view")
-    user.is_active = True
-    user.save()
-    return redirect("login_view")
 
 
 def redirect_on_store_page(request):
@@ -144,7 +127,6 @@ def cancel_order(request, pk):
         return render(request, "order_cancel.html")
 
     return render(request, "order_cancel.html")
-
 
 """ --- STAFF PART --- """
 
