@@ -29,6 +29,7 @@ def create_client(request):
     return render(request, "add_client.html", {"client": form})
 
 
+# Send auth link
 def send_activation_email(request, user: User):
     user_signed = Signer().sign(user.id)
     signed_url = request.build_absolute_uri(f"/activate/{user_signed}")
