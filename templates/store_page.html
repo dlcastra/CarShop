@@ -9,37 +9,50 @@
         .cars-container {
             margin-top: 40px;
         }
+
+        .cart-button {
+            position: absolute;
+            top: 50px;
+            right: 90px;
+        }
     </style>
 </head>
-<body style="background-color: #80cbc4; color: #1E1E1E" >
-    <h3 class="position-absolute top-0 end-0 p-5"><a href="/cart/" target="_blank">Кошик</a></h3>
-    <div class="container cars-container">
-        <h1>Доступні Автомобілі</h1>
-        <div class="row">
-            {% for car in cars %}
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
-                            <em>Рік випуску: {{ car.year }}</em><br>
-                            <em>Колір: {{ car.color }}</em><br>
-                            <em>Ціна: ${{ car.car_type.price }}</em><br>
-                            <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+<body style="background-color: #508bfc; color: #1E1E1E">
+<form method="POST" action="{% url 'view_cart' %}">
+    {% csrf_token %}
+    <div class="cart-button">
+        {% buttons %}
+            <input type="submit" class="btn btn-light" name="cart" value="Кошик">
+        {% endbuttons %}
+    </div>
+</form>
+<div class="container cars-container">
+    <h1>Доступні Автомобілі</h1>
+    <div class="row">
+        {% for car in cars %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
+                        <em>Рік випуску: {{ car.year }}</em><br>
+                        <em>Колір: {{ car.color }}</em><br>
+                        <em>Ціна: ${{ car.car_type.price }}</em><br>
+                        <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+                        {% csrf_token %}
+                        <p></p>
+                        <form method="POST" action="{% url 'create_order' car.id %}">
                             {% csrf_token %}
-                            <p></p>
-                            <form method="POST" action="{% url 'create_order' car.id %}">
-                                {% csrf_token %}
-                                {% buttons %}
-                                    <input type="submit" class="btn btn-outline-success" name="buy_car" value="Купити">
-                                {% endbuttons %}
-                            </form>
-                        </div>
+                            {% buttons %}
+                                <input type="submit" class="btn btn-outline-success" name="buy_car" value="Купити">
+                            {% endbuttons %}
+                        </form>
                     </div>
                 </div>
+            </div>
             {% empty %}
-                <p>На даний момент немає доступних автомобілів.</p>
-            {% endfor %}
-        </div>
+            <p>На даний момент немає доступних автомобілів.</p>
+        {% endfor %}
     </div>
+</div>
 </body>
 </html>
