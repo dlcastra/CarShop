@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from django.core.signing import Signer
+
+from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
 from store.forms import (
@@ -53,6 +54,20 @@ def register_view(request):
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
+
+
+def activate(request, user_signed):
+    try:
+        user_id = Signer().unsign(user_signed)
+    except BadSignature:
+        return redirect("login_view")
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect("login_view")
+    user.is_active = True
+    user.save()
+    return redirect("login_view")
 
 
 def redirect_on_store_page(request):
