@@ -26,7 +26,6 @@ psycopg==3.1.12
 psycopg-binary==3.1.12
 pycparser==2.21
 python-dateutil==2.8.2
-requests==2.31.0
 six==1.16.0
 soupsieve==2.5
 sqlparse==0.4.4
@@ -35,7 +34,9 @@ typing_extensions==4.8.0
 tzdata==2023.3
 urllib3==2.1.0
 whitenoise==6.6.0
-
+authlib ~= 1.0
+python-dotenv ~= 0.19
+requests ~= 2.27
 
 # Uncomment these lines to use a Postgres database. Both are needed, since in production
 # (which uses Linux) we want to install from source, so that security updates from the
