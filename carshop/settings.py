@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-from dotenv import load_dotenv, find_dotenv
 import secrets
 from pathlib import Path
 
@@ -78,13 +77,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "carshop.urls"
 
-# Add the following line after 'BASE_DIR = ...'
-TEMPLATE_DIR = os.path.join(BASE_DIR, "carshop", "templates")
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR, TEMPLATE_DIR],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -188,13 +184,3 @@ EMAIL_BACKEND = "django_mailjet.backends.MailjetBackend"
 MAILJET_API_KEY = "c2017c2bfb85160044b87829207d4b0f"
 MAILJET_API_SECRET = os.environ.get("MAILJET_API_SECRET")
 DEFAULT_FROM_EMAIL = "1dlcastra@gmail.com"
-
-# Load environment definition file
-ENV_FILE = find_dotenv()
-if ENV_FILE:
-    load_dotenv(ENV_FILE)
-
-# Load Auth0 application settings into memory
-AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
-AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
-AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET")
