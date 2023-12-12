@@ -87,4 +87,4 @@ class OrderQuantity(models.Model):
 
 class Image(models.Model):
     name = models.CharField(max_length=50)
-    image = models.FileField(upload_to='car-images', blank=True)
+    image = models.FileField(upload_to="car-images", blank=True)
