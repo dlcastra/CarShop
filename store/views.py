@@ -9,7 +9,8 @@ from store.forms import (
     CarTypeForm,
     CarForm,
     DealershipForm,
-    UserCreationFormWithEmail, CustomSignupForm,
+    UserCreationFormWithEmail,
+    CustomSignupForm,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 

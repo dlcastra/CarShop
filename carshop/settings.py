@@ -200,19 +200,15 @@ AUTHENTICATION_BACKENDS = [
 
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
+    "google": {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
-        'APP': {
-            'client_id': '123',
-            'secret': '456',
-            'key': ''
-        }
+        "APP": {"client_id": "123", "secret": "456", "key": ""}
     }
 }
 
 ACCOUNT_FORMS = {
-    'signup': 'store.forms.CustomSignupForm',
-    'login': 'store.forms.CustomLoginForm',
+    "signup": "store.forms.CustomSignupForm",
+    "login": "store.forms.CustomLoginForm",
 }
