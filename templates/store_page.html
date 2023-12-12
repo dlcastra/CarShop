@@ -38,6 +38,7 @@
                         <em>Колір: {{ car.color }}</em><br>
                         <em>Ціна: ${{ car.car_type.price }}</em><br>
                         <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+                        <em>{{ car.car_type.image }}</em>
                         {% csrf_token %}
                         <p></p>
                         <form method="POST" action="{% url 'create_order' car.id %}">
