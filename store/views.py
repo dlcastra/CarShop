@@ -1,6 +1,6 @@
+# from allauth.account.views import LoginView
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -9,7 +9,7 @@ from store.forms import (
     CarTypeForm,
     CarForm,
     DealershipForm,
-    UserCreationFormWithEmail,
+    UserCreationFormWithEmail, CustomSignupForm,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 
@@ -43,7 +43,7 @@ def send_activation_email(request, user: User):
 
 def register_view(request):
     if request.method == "GET":
-        form = UserCreationFormWithEmail()
+        form = CustomSignupForm()
         return render(request, "registration/register.html", {"form": form})
 
     form = UserCreationFormWithEmail(request.POST)
