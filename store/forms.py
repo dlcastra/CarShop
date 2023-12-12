@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import EmailField
 
-from store.models import Client, CarType, Car, Dealership
+from store.models import Client, CarType, Car, Dealership, Image
 
 
 class ClientForm(forms.ModelForm):
@@ -69,8 +69,13 @@ class ClientForm(forms.ModelForm):
 class CarTypeForm(forms.ModelForm):
     class Meta:
         model = CarType
-        fields = ["name", "brand", "price"]
-        labels = {"name": "Назва авто", "brand": "Марка авто", "price": "Ціна"}
+        fields = ["name", "brand", "price", "image"]
+        labels = {
+            "name": "Назва авто",
+            "brand": "Марка авто",
+            "price": "Ціна",
+            "image": "Фото",
+        }
 
     def clean_name(self):
         name = self.cleaned_data["name"]
@@ -146,3 +151,27 @@ class UserCreationFormWithEmail(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class ImageForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Image
+        fields = ["name", "image"]
+        labels = {"name": "Назва авто", "image": "Фото"}
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if len(name) > 50:
+            raise forms.ValidationError(
+                "Name is too long, max length is 50/Назва занадто вилекa, максимальна довжина 50"
+            )
+        return name
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if not image:
+            raise forms.ValidationError("Photo not selected")
+        return image
