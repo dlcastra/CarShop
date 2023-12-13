@@ -169,4 +169,7 @@ class CustomSignupForm(SignupForm):
 
 
 class CustomLoginForm(LoginForm):
-    ...
+    def save(self, request):
+        # user = super(CustomLoginForm, self).save(request)
+        # password = PasswordField(label="Password")
+        ...

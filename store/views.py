@@ -1,16 +1,19 @@
-# from allauth.account.views import LoginView
+from allauth.account.forms import SignupForm
+from allauth.account.views import SignupView
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 from store.forms import (
     ClientForm,
     CarTypeForm,
     CarForm,
     DealershipForm,
-    UserCreationFormWithEmail,
+    # UserCreationFormWithEmail,
     CustomSignupForm,
+    UserCreationFormWithEmail,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 
@@ -55,6 +58,42 @@ def register_view(request):
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
+
+
+# class CustomSignupView(SignupView):
+#     template_name = "registration/register.html"
+#     form_class = SignupForm  # Use the built-in SignupForm
+#     success_url = "activate"  # Assuming this is the URL name for activation
+#
+#     def form_valid(self, form):
+#         response = super().form_valid(form)
+#         self.object.is_active = False
+#         self.object.save()
+#         send_activation_email(self.request, self.object)
+#         return redirect('activate')
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['form'] = SignupForm()  # Use the built-in SignupForm
+#         return context
+#
+#     def get_success_url(self):
+#         return reverse(self.success_url)
+
+# class CustomLoginView(LoginView):
+#     model = LoginView
+#     template_name = "registration/login.html"
+#     form_class = CustomLoginForm()
+#     success_url = "store-page/"
+#
+#     def get(self, request, **kwargs):
+#         form = CustomLoginForm()
+#         return render(request, "registration/login.html", {"form": form})
+#
+#     def post(self, request, **kwargs):
+#         form = CustomLoginForm(request.POST)
+#         if form.is_valid():
+#             return redirect("redirect_on_store_page")
 
 
 def activate(request, user_signed):
