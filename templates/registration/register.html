@@ -1,4 +1,7 @@
+{#{% extends "base.html" %}#}
 {% load bootstrap5 %}
+{% load i18n %}
+{% load allauth account socialaccount %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 <section style="background-color: #508bfc">
@@ -18,10 +21,15 @@
                                         <input type="submit" class="btn btn-primary" value="Register">
                                     {% endbuttons %}
                                 </div>
-                            <p class="text-center text-muted mt-3 mb-0">Have already an account? <a href="{% url 'login_view' %}"
-                    class="fw-bold text-body"><u>Login here</u></a></p>
+                                <p class="text-center text-muted mt-3 mb-0">Have already an account? <a
+                                        href="{% url 'login_view' %}"
+                                        class="fw-bold text-body"><u>Login here</u></a></p>
 
+                                <p class="text-center text-muted mt-3 mb-0">Sign up with Google <a
+                                        href="{% provider_login_url 'google' %}"
+                                    class="fw-bold text-body"><u> Google</u></a></p>
                             </form>
+
 
                         </div>
                     </div>
