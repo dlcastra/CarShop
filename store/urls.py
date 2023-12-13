@@ -4,6 +4,8 @@ from django.urls import path, include
 from store import views
 
 urlpatterns = [
+    path("accounts/", include("allauth.urls")),
+    path("accounts/google/", include("allauth.socialaccount.urls"), name="auth_google"),
     path("", views.register_view, name="register_view"),
     path("login/", LoginView.as_view(), name="login_view"),
     path("activate/<user_signed>", views.activate, name="activate"),
