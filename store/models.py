@@ -15,7 +15,7 @@ class CarType(models.Model):
     name = models.CharField(max_length=50)
     brand = models.CharField(max_length=50)
     price = models.PositiveIntegerField()
-    image = models.ImageField(upload_to="car_image", null=True, blank=True)
+    image = models.ImageField(upload_to="car_image/", null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -87,4 +87,4 @@ class OrderQuantity(models.Model):
 
 class Image(models.Model):
     name = models.CharField(max_length=50)
-    image = models.FileField(upload_to="car-images", blank=True)
+    image = models.ImageField(upload_to="car-images/", blank=True)
