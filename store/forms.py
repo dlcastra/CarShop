@@ -154,9 +154,6 @@ class UserCreationFormWithEmail(UserCreationForm):
 
 
 class ImageForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     class Meta:
         model = Image
         fields = ["name", "image"]
@@ -169,9 +166,3 @@ class ImageForm(forms.ModelForm):
                 "Name is too long, max length is 50/Назва занадто вилекa, максимальна довжина 50"
             )
         return name
-
-    def clean_image(self):
-        image = self.cleaned_data.get("image")
-        if not image:
-            raise forms.ValidationError("Photo not selected")
-        return image
