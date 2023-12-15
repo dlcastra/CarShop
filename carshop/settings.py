@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "bootstrap5",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -162,7 +163,7 @@ STATIC_URL = "static/"
 AWS_STORAGE_BUCKET_NAME = "carshop-hillel"
 AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
 AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
-AWS_S3_REGION_NAME = "eu-north-1"  # Europe (Stockholm) eu-north-1
+AWS_S3_REGION_NAME = "eu-north-1"
 STORAGES = {
     # Enable WhiteNoise's GZip and Brotli compression of static assets:
     # https://whitenoise.readthedocs.io/en/latest/django.html#add-compression-and-caching-support

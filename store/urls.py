@@ -34,4 +34,6 @@ urlpatterns = [
         views.get_all_dealership,
         name="get_all_dealership",
     ),
+    # EDIT
+    path("for-staff-only/edit-car/<int:pk>", views.edit_car, name="edit_car"),
 ]

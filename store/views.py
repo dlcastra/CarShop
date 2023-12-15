@@ -1,8 +1,8 @@
 import uuid
 
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail
-
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -159,26 +159,46 @@ def add_new_car_type(request):
         form = CarTypeForm()
         return render(request, "add_or_create/add_car_type.html", {"car_type": form})
 
-    form = CarTypeForm(request.POST, request.FILES)
+    form = CarTypeForm(request.POST)
     if form.is_valid():
-        car_type_instance = form.save(commit=False)
-        if "image" in request.FILES:
-            car_type_instance.image = request.FILES["image"]
-
-        car_type_instance.save()
         form.save()
         return redirect("get_all_types_of_cars")
 
     return render(request, "add_or_create/add_car_type.html", {"car_type": form})
 
 
+def add_image(request):
+    if request.method == "GET":
+        form = ImageForm()
+        return render(request, "add_or_create/add_image.html", {"form": form})
+
+    form = ImageForm(request.POST, request.FILES)
+    if form.is_valid():
+        name = form.cleaned_data["name"]
+        image = form.cleaned_data["image"]
+
+        car_image = Image.objects.create(name=name, image=image)
+        car_image.name = name
+        car_image.image.save(f"{uuid.uuid4().hex}.png", ContentFile(image.read()))
+        return render(
+            request, "add_or_create/add_image.html", {"form": form, "image": car_image}
+        )
+
+    return render(request, "add_or_create/add_image.html", {"form": form})
+
+
 def add_new_car(request):
     if request.method == "GET":
-        form = CarForm
+        form = CarForm()
         return render(request, "add_or_create/add_car.html", {"car": form})
 
-    form = CarForm(request.POST)
+    form = CarForm(request.POST, request.FILES)
     if form.is_valid():
+        car_type_instance = form.save(commit=False)
+        if "image" in request.FILES:
+            car_type_instance.image = request.FILES["image"]
+
+        car_type_instance.save()
         form.save()
         return redirect("get_all_cars")
 
@@ -198,23 +218,26 @@ def add_dealership(request):
     return render(request, "add_or_create/add_dealership.html", {"dealer": form})
 
 
-def add_image(request):
+# EDIT METHODS
+
+
+def edit_car(request, pk):
+    car = get_object_or_404(Car, pk=pk)
     if request.method == "GET":
-        form = ImageForm()
-        return render(request, "add_or_create/add_image.html", {"image": form})
+        form = CarForm(instance=car)
+        return render(request, "updata_or_edit/edit_car.html", {"car": form})
 
-    form = ImageForm(request.POST, request.FILES)
-    if request.method == "POST":
-        if form.is_valid():
-            name = form.cleaned_data["name"]
-            image = form.cleaned_data["image"]
+    form = CarForm(request.POST, request.FILES, instance=car)
+    if "edit" in request.POST:
+        car_instance = form.save(commit=False)
+        if "image" in request.FILES:
+            car_instance.image = request.FILES["image"]
 
-            car_image = Image()
-            car_image.name = name
-            car_image.image.save(uuid.uuid4().hex, image)
-            return render(request, "add_or_create/add_image.html", {"image": form})
+        car_instance.save()
+        form.save()
+        return redirect("get_all_cars")
 
-    return render(request, "add_or_create/add_image.html", {"image": form})
+    return render(request, "updata_or_edit/edit_car.html", {"car": form})
 
 
 # GET METHODS

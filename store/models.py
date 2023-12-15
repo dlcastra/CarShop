@@ -15,7 +15,6 @@ class CarType(models.Model):
     name = models.CharField(max_length=50)
     brand = models.CharField(max_length=50)
     price = models.PositiveIntegerField()
-    image = models.ImageField(upload_to="car_image/", null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -25,6 +24,7 @@ class Car(models.Model):
     car_type = models.ForeignKey(CarType, on_delete=models.CASCADE)
     color = models.CharField(max_length=50)
     year = models.IntegerField()
+    image = models.ImageField(upload_to="car_image/", null=True, blank=True)
     blocked_by_order = models.ForeignKey(
         "Order", on_delete=models.SET_NULL, null=True, related_name="reserved_cars"
     )

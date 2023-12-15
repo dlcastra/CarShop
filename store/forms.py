@@ -69,12 +69,11 @@ class ClientForm(forms.ModelForm):
 class CarTypeForm(forms.ModelForm):
     class Meta:
         model = CarType
-        fields = ["name", "brand", "price", "image"]
+        fields = ["name", "brand", "price"]
         labels = {
             "name": "Назва авто",
             "brand": "Марка авто",
             "price": "Ціна",
-            "image": "Фото",
         }
 
     def clean_name(self):
@@ -97,8 +96,13 @@ class CarTypeForm(forms.ModelForm):
 class CarForm(forms.ModelForm):
     class Meta:
         model = Car
-        fields = ["car_type", "color", "year"]
-        labels = {"car_type": "Тип авто", "color": "Колір", "year": "Рік"}
+        fields = ["car_type", "color", "year", "image"]
+        labels = {
+            "car_type": "Тип авто",
+            "color": "Колір",
+            "year": "Рік",
+            "image": "Фото",
+        }
 
     def clean_color(self):
         color = self.cleaned_data["color"]
