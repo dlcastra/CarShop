@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import EmailField
 
-from store.models import Client, CarType, Car, Dealership
+from store.models import Client, CarType, Car, Dealership, Image
 
 
 class ClientForm(forms.ModelForm):
@@ -70,7 +70,11 @@ class CarTypeForm(forms.ModelForm):
     class Meta:
         model = CarType
         fields = ["name", "brand", "price"]
-        labels = {"name": "Назва авто", "brand": "Марка авто", "price": "Ціна"}
+        labels = {
+            "name": "Назва авто",
+            "brand": "Марка авто",
+            "price": "Ціна",
+        }
 
     def clean_name(self):
         name = self.cleaned_data["name"]
@@ -92,8 +96,13 @@ class CarTypeForm(forms.ModelForm):
 class CarForm(forms.ModelForm):
     class Meta:
         model = Car
-        fields = ["car_type", "color", "year"]
-        labels = {"car_type": "Тип авто", "color": "Колір", "year": "Рік"}
+        fields = ["car_type", "color", "year", "image"]
+        labels = {
+            "car_type": "Тип авто",
+            "color": "Колір",
+            "year": "Рік",
+            "image": "Фото",
+        }
 
     def clean_color(self):
         color = self.cleaned_data["color"]
@@ -146,3 +155,18 @@ class UserCreationFormWithEmail(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = ["name", "image"]
+        labels = {"name": "Назва авто", "image": "Фото"}
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if len(name) > 50:
+            raise forms.ValidationError(
+                "Name is too long, max length is 50/Назва занадто вилекa, максимальна довжина 50"
+            )
+        return name
