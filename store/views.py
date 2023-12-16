@@ -1,11 +1,12 @@
 import uuid
 
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
+
 
 from store.forms import (
     ClientForm,
@@ -13,9 +14,6 @@ from store.forms import (
     CarForm,
     DealershipForm,
     UserCreationFormWithEmail,
-    CustomSignupForm,
-    UserCreationFormWithEmail,
-    ImageForm,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity, Image
 
@@ -60,6 +58,11 @@ def register_view(request):
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")
 
 
 def activate(request, user_signed):

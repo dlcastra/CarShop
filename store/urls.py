@@ -2,7 +2,6 @@ from django.contrib.auth.views import LoginView
 from django.urls import path, include
 
 from store import views
-from store.views import LoginViewCustom
 
 urlpatterns = [
     path("accounts/", include("allauth.urls")),
