@@ -2,12 +2,14 @@ from django.contrib.auth.views import LoginView
 from django.urls import path, include
 
 from store import views
+from store.views import LoginViewCustom
 
 urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("accounts/google/", include("allauth.socialaccount.urls"), name="auth_google"),
     path("", views.register_view, name="register_view"),
     path("login/", LoginView.as_view(), name="login_view"),
+    path("logout/", views.logout_view, name="logout_view"),
     path("activate/<user_signed>", views.activate, name="activate"),
     path("store-page/", views.redirect_on_store_page, name="redirect_on_store_page"),
     path("create_order/<int:pk>/", views.create_order, name="create_order"),

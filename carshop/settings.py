@@ -222,8 +222,3 @@ SOCIALACCOUNT_PROVIDERS = {
         "OAUTH_PKCE_ENABLED": True,
     }
 }
-
-ACCOUNT_FORMS = {
-    "signup": "store.forms.CustomSignupForm",
-    "login": "store.forms.CustomLoginForm",
-}
