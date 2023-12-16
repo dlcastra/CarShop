@@ -24,6 +24,7 @@ class Car(models.Model):
     car_type = models.ForeignKey(CarType, on_delete=models.CASCADE)
     color = models.CharField(max_length=50)
     year = models.IntegerField()
+    image = models.ImageField(upload_to="car_image/", null=True, blank=True)
     blocked_by_order = models.ForeignKey(
         "Order", on_delete=models.SET_NULL, null=True, related_name="reserved_cars"
     )
@@ -82,3 +83,11 @@ class OrderQuantity(models.Model):
     )
     quantity = models.PositiveIntegerField(default=1)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="car_types")
+
+
+class Image(models.Model):
+    name = models.CharField(max_length=50)
+    image = models.ImageField(upload_to="car-images/", blank=True)
+
+    def __str__(self):
+        return self.name

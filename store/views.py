@@ -1,7 +1,7 @@
-from allauth.account.forms import SignupForm
-from allauth.account.views import SignupView, LoginView
-from django.contrib.auth import logout
+import uuid
+
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,9 +13,11 @@ from store.forms import (
     CarForm,
     DealershipForm,
     UserCreationFormWithEmail,
+    CustomSignupForm,
     UserCreationFormWithEmail,
+    ImageForm,
 )
-from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
+from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity, Image
 
 """ --- CLIENT PART --- """
 
@@ -23,14 +25,14 @@ from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity
 def create_client(request):
     if request.method == "GET":
         form = ClientForm()
-        return render(request, "add_client.html", {"client": form})
+        return render(request, "add_or_create/add_client.html", {"client": form})
 
     form = ClientForm(request.POST)
     if form.is_valid():
         form.save()
         return redirect("redirect_on_store_page")
 
-    return render(request, "add_client.html", {"client": form})
+    return render(request, "add_or_create/add_client.html", {"client": form})
 
 
 def send_activation_email(request, user: User):
@@ -58,15 +60,6 @@ def register_view(request):
         return redirect("login_view")
 
     return render(request, "registration/register.html", {"form": form})
-
-
-class LoginViewCustom(LoginView):
-    template_name = "registration/login.html"
-
-
-def logout_view(request):
-    logout(request)
-    return redirect("login_view")
 
 
 def activate(request, user_signed):
@@ -116,7 +109,9 @@ def view_cart(request):
         user_cars = client.order_cart.all()
         order = Order.objects.filter(client=client, is_paid=False).first()
         return render(
-            request, "cart_page.html", {"user_cars": user_cars, "order": order}
+            request,
+            "show_or_get/cart_page.html",
+            {"user_cars": user_cars, "order": order},
         )
 
 
@@ -124,7 +119,7 @@ def pay_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
     if request.method == "GET":
-        return render(request, "order_success.html")
+        return render(request, "show_or_get/order_success.html")
 
     if request.method == "POST":
         if not order.is_paid:
@@ -138,14 +133,14 @@ def pay_order(request, pk):
             order.save()
             client.order_cart.clear()
 
-            return render(request, "order_success.html")
-        return render(request, "order_success.html")
+            return render(request, "show_or_get/order_success.html")
+        return render(request, "show_or_get/order_success.html")
 
 
 def cancel_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if request.method == "GET":
-        return render(request, "order_cancel.html")
+        return render(request, "show_or_get/order_cancel.html")
 
     if request.method == "POST":
         cars = Car.objects.filter(blocked_by_order=order)
@@ -153,9 +148,9 @@ def cancel_order(request, pk):
             car.unblock()
         order.delete()
 
-        return render(request, "order_cancel.html")
+        return render(request, "show_or_get/order_cancel.html")
 
-    return render(request, "order_cancel.html")
+    return render(request, "show_or_get/order_cancel.html")
 
 
 """ --- STAFF PART --- """
@@ -165,54 +160,103 @@ def cancel_order(request, pk):
 def add_new_car_type(request):
     if request.method == "GET":
         form = CarTypeForm()
-        return render(request, "add_car_type.html", {"car_type": form})
+        return render(request, "add_or_create/add_car_type.html", {"car_type": form})
 
     form = CarTypeForm(request.POST)
     if form.is_valid():
         form.save()
         return redirect("get_all_types_of_cars")
 
-    return render(request, "add_car_type.html", {"car_type": form})
+    return render(request, "add_or_create/add_car_type.html", {"car_type": form})
+
+
+def add_image(request):
+    if request.method == "GET":
+        form = ImageForm()
+        return render(request, "add_or_create/add_image.html", {"form": form})
+
+    form = ImageForm(request.POST, request.FILES)
+    if form.is_valid():
+        name = form.cleaned_data["name"]
+        image = form.cleaned_data["image"]
+
+        car_image = Image.objects.create(name=name, image=image)
+        car_image.name = name
+        car_image.image.save(f"{uuid.uuid4().hex}.png", ContentFile(image.read()))
+        return render(
+            request, "add_or_create/add_image.html", {"form": form, "image": car_image}
+        )
+
+    return render(request, "add_or_create/add_image.html", {"form": form})
 
 
 def add_new_car(request):
     if request.method == "GET":
-        form = CarForm
-        return render(request, "add_car.html", {"car": form})
+        form = CarForm()
+        return render(request, "add_or_create/add_car.html", {"car": form})
 
-    form = CarForm(request.POST)
+    form = CarForm(request.POST, request.FILES)
     if form.is_valid():
+        car_type_instance = form.save(commit=False)
+        if "image" in request.FILES:
+            car_type_instance.image = request.FILES["image"]
+
+        car_type_instance.save()
         form.save()
         return redirect("get_all_cars")
 
-    return render(request, "add_car.html", {"car": form})
+    return render(request, "add_or_create/add_car.html", {"car": form})
 
 
 def add_dealership(request):
     if request.method == "GET":
         form = DealershipForm()
-        return render(request, "add_dealership.html", {"dealer": form})
+        return render(request, "add_or_create/add_dealership.html", {"dealer": form})
 
     form = DealershipForm(request.POST)
     if form.is_valid():
         form.save()
         return redirect("get_all_dealership")
 
-    return render(request, "add_dealership.html", {"dealer": form})
+    return render(request, "add_or_create/add_dealership.html", {"dealer": form})
+
+
+# EDIT METHODS
+
+
+def edit_car(request, pk):
+    car = get_object_or_404(Car, pk=pk)
+    if request.method == "GET":
+        form = CarForm(instance=car)
+        return render(request, "updata_or_edit/edit_car.html", {"car": form})
+
+    form = CarForm(request.POST, request.FILES, instance=car)
+    if "edit" in request.POST:
+        car_instance = form.save(commit=False)
+        if "image" in request.FILES:
+            car_instance.image = request.FILES["image"]
+
+        car_instance.save()
+        form.save()
+        return redirect("get_all_cars")
+
+    return render(request, "updata_or_edit/edit_car.html", {"car": form})
 
 
 # GET METHODS
 def get_all_types_of_cars(request):
     if request.method == "GET":
         car_type_list = CarType.objects.all()
-        return render(request, "all_types_of_cars.html", {"car_type": car_type_list})
+        return render(
+            request, "show_or_get/all_types_of_cars.html", {"car_type": car_type_list}
+        )
 
 
 def get_all_cars(request):
     car_list = Car.objects.all()
-    return render(request, "all_cars.html", {"car": car_list})
+    return render(request, "show_or_get/all_cars.html", {"car": car_list})
 
 
 def get_all_dealership(request):
     dealership_list = Dealership.objects.all()
-    return render(request, "all_dealers.html", {"dealer": dealership_list})
+    return render(request, "show_or_get/all_dealers.html", {"dealer": dealership_list})

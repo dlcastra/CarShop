@@ -25,6 +25,7 @@ urlpatterns = [
     ),
     path("for-staff-only/add-new-car/", views.add_new_car, name="add_new_car"),
     path("for-staff-only/add-dealer/", views.add_dealership, name="add_dealership"),
+    path("for-staff-only/add-image/", views.add_image, name="add_image"),
     # GET
     path(
         "for-staff-only/get-all-types/",
@@ -37,4 +38,6 @@ urlpatterns = [
         views.get_all_dealership,
         name="get_all_dealership",
     ),
+    # EDIT
+    path("for-staff-only/edit-car/<int:pk>", views.edit_car, name="edit_car"),
 ]
