@@ -13,7 +13,7 @@ from store.forms import (
     CarTypeForm,
     CarForm,
     DealershipForm,
-    UserCreationFormWithEmail,
+    UserCreationFormWithEmail, ImageForm,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity, Image
 
