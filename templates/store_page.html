@@ -5,6 +5,7 @@
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+
     <style>
         .cars-container {
             margin-top: 40px;
@@ -15,7 +16,18 @@
             top: 50px;
             right: 90px;
         }
+
+        .card-body {
+            height: 400px; /* Set a fixed height for card-body */
+        }
+
+        .card-body img {
+            width: 100%; /* Ensure the image takes up the entire width of the container */
+            height: 100%; /* Ensure the image takes up the entire height of the container */
+            object-fit: cover; /* Maintain aspect ratio and cover the entire container */
+        }
     </style>
+
 </head>
 <body style="background-color: #508bfc; color: #1E1E1E">
 <form method="POST" action="{% url 'view_cart' %}">
@@ -34,11 +46,22 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
+                        <em>ID: {{ car.id }}</em><br>
                         <em>Рік випуску: {{ car.year }}</em><br>
                         <em>Колір: {{ car.color }}</em><br>
                         <em>Ціна: ${{ car.car_type.price }}</em><br>
                         <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
                         {% csrf_token %}
+
+                        {% if car.image %}
+                            <a href="{{ car.image.url }}" target="_blank">
+                                <img src="{{ car.image.url }}" alt="{{ car.name }} Image"
+                                     style="max-width: 300px; height: auto" >
+                            </a>
+                        {% else %}
+                            <p>No Image Available</p>
+                        {% endif %}
+
                         <p></p>
                         <form method="POST" action="{% url 'create_order' car.id %}">
                             {% csrf_token %}
@@ -49,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            {% empty %}
+        {% empty %}
             <p>На даний момент немає доступних автомобілів.</p>
         {% endfor %}
     </div>

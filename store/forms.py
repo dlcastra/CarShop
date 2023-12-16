@@ -7,7 +7,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import EmailField
 
-from store.models import Client, CarType, Car, Dealership
+from store.models import Client, CarType, Car, Dealership, Image
 
 
 class ClientForm(forms.ModelForm):
@@ -72,7 +72,11 @@ class CarTypeForm(forms.ModelForm):
     class Meta:
         model = CarType
         fields = ["name", "brand", "price"]
-        labels = {"name": "Назва авто", "brand": "Марка авто", "price": "Ціна"}
+        labels = {
+            "name": "Назва авто",
+            "brand": "Марка авто",
+            "price": "Ціна",
+        }
 
     def clean_name(self):
         name = self.cleaned_data["name"]
@@ -94,8 +98,13 @@ class CarTypeForm(forms.ModelForm):
 class CarForm(forms.ModelForm):
     class Meta:
         model = Car
-        fields = ["car_type", "color", "year"]
-        labels = {"car_type": "Тип авто", "color": "Колір", "year": "Рік"}
+        fields = ["car_type", "color", "year", "image"]
+        labels = {
+            "car_type": "Тип авто",
+            "color": "Колір",
+            "year": "Рік",
+            "image": "Фото",
+        }
 
     def clean_color(self):
         color = self.cleaned_data["color"]
@@ -150,26 +159,17 @@ class UserCreationFormWithEmail(UserCreationForm):
         return user
 
 
-class CustomSignupForm(SignupForm):
-    username = forms.CharField(label="Name", required=True)
-    email = EmailField(label="Email address", required=True, help_text="Required.")
-    password1 = PasswordField(required=True)
-    password2 = PasswordField(required=True)
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = ["name", "image"]
+        labels = {"name": "Назва авто", "image": "Фото"}
 
-    def save(self, request):
-        # Ensure you call the parent class's save.
-        # .save() returns a User object.
-        user = super(CustomSignupForm, self).save(request)
-        user.username = self.cleaned_data["username"]
-        user.email = self.cleaned_data["email"]
-        user.password1 = self.cleaned_data["password1"]
-        user.password2 = self.cleaned_data["password2"]
-        # You must return the original result.
-        return user
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if len(name) > 50:
+            raise forms.ValidationError(
+                "Name is too long, max length is 50/Назва занадто вилекa, максимальна довжина 50"
+            )
+        return name
 
-
-class CustomLoginForm(LoginForm):
-    def save(self, request):
-        # user = super(CustomLoginForm, self).save(request)
-        # password = PasswordField(label="Password")
-        ...
