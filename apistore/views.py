@@ -108,8 +108,7 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
             order.save()
             client.order_cart.clear()
 
-            serializer = self.get_serializer(order)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"message": "Order was successfully paid"}, status=status.HTTP_200_OK)
 
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
