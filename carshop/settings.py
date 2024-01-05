@@ -239,3 +239,4 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticatedOrReadOnly"
     ]
 }
+MONOBANK_TOKEN = os.getenv("MONOBANK_TOKEN")
