@@ -4,14 +4,13 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
-
 from apistore.serializers import (
     CarSerializer,
     DealershipSerializer,
     CarTypeSerializer,
     OrderSerializer,
 )
+from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
 
 
 class CarTypeViewSet(

@@ -75,6 +75,7 @@ class Order(models.Model):
         Dealership, on_delete=models.CASCADE, related_name="orders"
     )
     is_paid = models.BooleanField(default=False)
+    order_id = models.CharField(max_length=999, null=True)
 
 
 class OrderQuantity(models.Model):
