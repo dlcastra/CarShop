@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -237,5 +238,11 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly"
-    ]
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ],
 }
+MONOBANK_TOKEN = os.getenv("MONOBANK_TOKEN")
