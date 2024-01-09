@@ -76,6 +76,8 @@ class Order(models.Model):
     )
     is_paid = models.BooleanField(default=False)
     order_id = models.CharField(max_length=999, null=True)
+    invoice_url = models.CharField(max_length=100, null=True)
+    status = models.CharField(max_length=100, null=True)
 
 
 class OrderQuantity(models.Model):

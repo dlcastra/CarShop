@@ -2,8 +2,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from apistore.invoices import create_invoice, verify_signature
 from apistore.serializers import (
     CarSerializer,
     DealershipSerializer,
@@ -91,7 +94,7 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
     queryset = Order.objects.filter(is_paid=False)
     serializer_class = OrderSerializer
 
-    def update(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         order = self.get_object()
 
         if not order.is_paid:
@@ -103,16 +106,16 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
                 car.owner = client
                 car.save()
 
+            # create_invoice(order,webhook_url="https://webhook.site/be9e296b-d8f0-48e8-9119-467e57f0e19b",)
+            create_invoice(order, reverse("webhook-mono", request=request))
             order.is_paid = True
+            order.status = "paid"
             order.save()
-            client.order_cart.clear()
 
             return Response(
-                {"message": "Order was successfully paid"}, status=status.HTTP_200_OK
+                {"invoice": order.invoice_url},
+                status=status.HTTP_200_OK,
             )
-
-        serializer = self.get_serializer(order)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         order = self.get_object()
@@ -123,3 +126,18 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
         order.delete()
 
         return Response({"message": "The order was successfully canceled"})
+
+
+class MonoAcquiringWebhookReceiver(APIView):
+    def post(self, request):
+        try:
+            verify_signature(request)
+        except Exception:
+            return Response({"status": "error"}, status=400)
+        reference = request.data.get("reference")
+        order = Order.objects.get(id=reference)
+        if order.order_id != request.data.get("invoiceId"):
+            return Response({"status": "error"}, status=400)
+        order.status = request.data.get("status", "error")
+        order.save()
+        return Response({"status": "ok"})
