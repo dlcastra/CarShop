@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
@@ -25,3 +27,9 @@ def sample_user():
     user = User(username="User", password="UserPassword")
     client.force_authenticate(user)
     return client
+
+
+@pytest.fixture
+def mock_create_invoice(request):
+    with patch("apistore.invoices.create_invoice") as mock_create_invoice:
+        yield mock_create_invoice
