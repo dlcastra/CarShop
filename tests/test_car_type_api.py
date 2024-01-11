@@ -14,7 +14,7 @@ def test_car_type_get(sample_user):
     assert response.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_car_type_get_detail(sample_user):
     car_type1 = CarType.objects.create(id=1, name="X5", brand="BMW", price=90000)
     car_type2 = CarType.objects.create(id=2, name="R8", brand="AUDI", price=100000)

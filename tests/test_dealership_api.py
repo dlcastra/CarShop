@@ -43,7 +43,7 @@ def test_user_is_not_authenticate():
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_post_dealer(sample_user):
     car_type = CarType.objects.create(id=1, name="X5", brand="BMW", price=90000)
     url = reverse("dealers-list")
@@ -83,7 +83,7 @@ def test_method_not_allowed(sample_user):
     assert response_delete.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db
 def test_bed_request(sample_user):
     car_type = CarType.objects.create(id=1, name="X5", brand="BMW", price=90000)
 
