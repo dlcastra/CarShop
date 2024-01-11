@@ -3,37 +3,38 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from samples import sample_car, sample_user
+from samples import sample_user
 from store.models import CarType, Car
-
-client = APIClient()
 
 
 @pytest.mark.django_db
-def test_get_cars():
+def test_get_cars(sample_user):
     url = reverse("car-list")
-    response = client.get(url)
+    response = sample_user.get(url)
     assert response.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.django_db
-def test_get_car_detail(sample_car):
-    url = reverse("car-detail", args=[sample_car.id])
-    response = client.get(url)
+@pytest.mark.django_db(transaction=True)
+def test_get_car_detail(sample_user):
+    car_type = CarType.objects.create(name="X5", brand="BMW", price=90000)
+    car = Car.objects.create(car_type=car_type, color="Black", year=2024, image=None)
+    url = reverse("car-detail", args=[car.id])
+    response = sample_user.get(url)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-        "id": sample_car.id,
-        "car_type": sample_car.car_type.id,
-        "color": sample_car.color,
-        "year": sample_car.year,
-        "image": sample_car.image,
+        "id": car.id,
+        "car_type": car_type.id,
+        "color": car.color,
+        "year": car.year,
+        "image": car.image,
     }
     assert response.status_code != status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.django_db
 def test_user_is_not_authenticate():
+    client = APIClient()
     url = reverse("car-list")
     car_type = CarType.objects.create(id=1, name="X5", brand="BMW", price=90000)
     data = {
@@ -48,7 +49,6 @@ def test_user_is_not_authenticate():
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-@pytest.mark.django_db
 @pytest.mark.django_db
 def test_post_car(sample_user):
     car_type = CarType.objects.create(id=1, name="X5", brand="BMW", price=90000)

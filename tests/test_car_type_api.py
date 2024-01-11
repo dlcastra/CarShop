@@ -6,23 +6,21 @@ from rest_framework.test import APIClient
 from samples import sample_user
 from store.models import CarType
 
-client = APIClient()
-
 
 @pytest.mark.django_db
-def test_car_type_get():
+def test_car_type_get(sample_user):
     url = reverse("car-type-list")
-    response = client.get(url)
+    response = sample_user.get(url)
     assert response.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db
-def test_car_type_get_detail():
+def test_car_type_get_detail(sample_user):
     car_type1 = CarType.objects.create(id=1, name="X5", brand="BMW", price=90000)
     car_type2 = CarType.objects.create(id=2, name="R8", brand="AUDI", price=100000)
 
     url = reverse("car-type-detail", args=[car_type1.id])
-    response = client.get(url)
+    response = sample_user.get(url)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.status_code != status.HTTP_404_NOT_FOUND
@@ -31,7 +29,8 @@ def test_car_type_get_detail():
 
 
 @pytest.mark.django_db
-def test_user_is_not_authenticate():
+def test_user_is_not_authenticate(sample_user):
+    client = APIClient()
     url = reverse("car-type-list")
     data = {"name": "X3", "brand": "BMW", "price": 80000}
     response_get = client.get(url)

@@ -3,8 +3,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from samples import sample_car, sample_user
-from store.models import CarType, Dealership, Client
+from samples import sample_car, sample_user, sample_car_type
+from store.models import Dealership, Client
 
 client = APIClient()
 
@@ -17,28 +17,24 @@ def test_get_order():
 
 
 @pytest.mark.django_db
-def test_get_order_detail(sample_car):
+def test_get_order_detail(sample_car, sample_car_type):
     url = reverse("buy-car-detail", args=[sample_car.id])
     response = client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
         "id": sample_car.id,
-        "car_type": sample_car.car_type.id,
+        "car_type": sample_car_type.id,
         "color": sample_car.color,
         "year": sample_car.year,
         "image": sample_car.image,
     }
 
 
-@pytest.mark.django_db
-def test_create_order(sample_user, sample_car):
+@pytest.mark.django_db(transaction=True)
+def test_create_order(sample_user, sample_car, sample_car_type):
     client_ = Client.objects.create(
         name="User", email="ex@gmail.com", phone="+380667171304"
-    )
-
-    sample_car_type = CarType.objects.create(
-        name="CarType", brand="Brand1", price=10000
     )
     dealer = Dealership.objects.create(name="Dealer")
     dealer.clients.add(client_)
