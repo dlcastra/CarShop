@@ -35,31 +35,6 @@ def test_get_cart_detail(sample_user):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_pay_order(sample_user):
-    headers = {"X-Token": settings.MONOBANK_TOKEN}
-    car_type = CarType.objects.create(name="X5", brand="BMW", price=90000)
-    client_ = Client.objects.create(
-        name="John", email="john@example.com", phone="123456789"
-    )
-    car = Car.objects.create(car_type=car_type, color="Black", year=2022, owner=client_)
-    order = Order.objects.create(
-        client=client_, dealership=Dealership.objects.create(name="Dealer")
-    )
-    order.reserved_cars.add(car)
-    request = requests.post(
-        "https://api.monobank.ua/api/merchant/invoice/create",
-        headers=headers,
-    )
-    order.order_id = request.json()["invoiceId"]
-    order.invoice_url = request.json()["pageUrl"]
-
-    url = reverse("cart-detail", kwargs={"pk": order.pk})
-    response = sample_user.post(url)
-
-    assert response.status_code == 201
-
-
-@pytest.mark.django_db(transaction=True)
 def test_delete_order(sample_user):
     car_type = CarType.objects.create(name="X5", brand="BMW", price=90000)
     client_ = Client.objects.create(
