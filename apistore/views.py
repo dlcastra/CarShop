@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -13,6 +14,7 @@ from apistore.serializers import (
     CarTypeSerializer,
     OrderSerializer,
 )
+from carshop import settings
 from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
 
 
@@ -65,7 +67,8 @@ class CreateOrderView(
     serializer_class = CarSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def post(self, request, pk):
+    @staticmethod
+    def post(request, pk):
         car = get_object_or_404(Car, pk=pk)
         if car.blocked_by_order or car.owner:
             return Response(
@@ -106,16 +109,25 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
                 car.owner = client
                 car.save()
 
-            # create_invoice(order,webhook_url="https://webhook.site/be9e296b-d8f0-48e8-9119-467e57f0e19b",)
             create_invoice(order, reverse("webhook-mono", request=request))
-            order.is_paid = True
-            order.status = "paid"
-            order.save()
-
-            return Response(
-                {"invoice": order.invoice_url},
-                status=status.HTTP_200_OK,
+            order_info = (
+                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
             )
+            headers = {"X-Token": settings.MONOBANK_TOKEN}
+            status_check = order_info + order.order_id
+            response = requests.get(status_check, headers=headers)
+            data = response.json()
+
+            if data["status"] == "created":
+                return Response(
+                    {"invoice": order.invoice_url, "message": "Your invoice"},
+                    status=status.HTTP_200_OK,
+                )
+
+            elif data["status"] == "success":
+                order.is_paid = True
+                order.status = "paid"
+                order.save()
 
     def delete(self, request, *args, **kwargs):
         order = self.get_object()
