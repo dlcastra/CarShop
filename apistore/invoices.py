@@ -54,6 +54,7 @@ def create_invoice(order: Order, webhook_url):
         json=request_body,
         headers=headers,
     )
+    request.raise_for_status()
     order.order_id = request.json()["invoiceId"]
     order.invoice_url = request.json()["pageUrl"]
     order.status = "created"
