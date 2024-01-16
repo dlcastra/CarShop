@@ -140,17 +140,8 @@ class MonoAcquiringWebhookReceiver(APIView):
         if order.order_id != request.data.get("invoiceId"):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
-        # order_info = (
-        #     "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
-        # )
-        #
-        # headers = {"X-Token": settings.MONOBANK_TOKEN}
-        # status_check = order_info + order.order_id
-        # response = requests.get(status_check, headers=headers)
-        # data = response.json()
-        # if data["status"] == "created":
-        #     order.is_paid = True
-        #     order.save()
-        #     return Response({"status": "Paid"}, status=200)
-        # order.save()
+        if order.status == "success":
+            order.is_paid = True
+            order.save()
+            return Response({"status": "Paid"}, status=200)
         return Response({"status": "ok"})
