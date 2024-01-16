@@ -1,10 +1,8 @@
 import pytest
-import requests
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from carshop import settings
 from samples import sample_user
 from store.models import CarType, Dealership, Client, Order, Car
 
