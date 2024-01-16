@@ -110,35 +110,23 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
                 car.save()
 
             create_invoice(order, reverse("webhook-mono", request=request))
-            # order_info = (
-            #     "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
-            # )
-            # headers = {"X-Token": settings.MONOBANK_TOKEN}
-            # status_check = order_info + order.order_id
-            # response = requests.get(status_check, headers=headers)
-            # data = response.json()
-            #
-            # if data["status"] == "created":
-            #     return Response(
-            #         {"invoice": order.invoice_url, "message": "Your invoice"},
-            #         status=status.HTTP_200_OK,
-            #     )
-            #
-            # elif data["status"] == "success":
             order.is_paid = True
             order.status = "paid"
             order.save()
+            return Response(
+                {"invoice": order.invoice_url, "message": "Your invoice"},
+                status=status.HTTP_200_OK,
+            )
 
+    def delete(self, request, *args, **kwargs):
+        order = self.get_object()
+        cars = Car.objects.filter(blocked_by_order=order)
 
-def delete(self, request, *args, **kwargs):
-    order = self.get_object()
-    cars = Car.objects.filter(blocked_by_order=order)
+        for car in cars:
+            car.unblock()
+        order.delete()
 
-    for car in cars:
-        car.unblock()
-    order.delete()
-
-    return Response({"message": "The order was successfully canceled"})
+        return Response({"message": "The order was successfully canceled"})
 
 
 class MonoAcquiringWebhookReceiver(APIView):
@@ -152,5 +140,17 @@ class MonoAcquiringWebhookReceiver(APIView):
         if order.order_id != request.data.get("invoiceId"):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
-        order.save()
+        # order_info = (
+        #     "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
+        # )
+        #
+        # headers = {"X-Token": settings.MONOBANK_TOKEN}
+        # status_check = order_info + order.order_id
+        # response = requests.get(status_check, headers=headers)
+        # data = response.json()
+        # if data["status"] == "created":
+        #     order.is_paid = True
+        #     order.save()
+        #     return Response({"status": "Paid"}, status=200)
+        # order.save()
         return Response({"status": "ok"})
