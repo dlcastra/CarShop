@@ -356,7 +356,7 @@ paths:
         '500':
           description: Internal Server Error
 
-    put:
+    post:
       summary: Pay order
       parameters:
         - name: pk
@@ -364,15 +364,6 @@ paths:
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            example:
-              - id: 1
-                client: 1
-                dealership: 1
-                is_paid: True
       responses:
         "200":
           description: A successful response
