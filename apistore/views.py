@@ -1,4 +1,3 @@
-import requests
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -14,7 +13,6 @@ from apistore.serializers import (
     CarTypeSerializer,
     OrderSerializer,
 )
-from carshop import settings
 from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
 
 
