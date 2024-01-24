@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
@@ -85,6 +86,7 @@ def redirect_on_store_page(request):
     return render(request, "store_page.html", {"cars": car_list})
 
 
+@login_required
 def create_order(request, pk):
     car = get_object_or_404(Car, pk=pk)
     if car.blocked_by_order or car.owner:
@@ -119,6 +121,7 @@ def view_cart(request):
         )
 
 
+@login_required
 def pay_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
@@ -141,6 +144,7 @@ def pay_order(request, pk):
         return render(request, "show_or_get/order_success.html")
 
 
+@login_required
 def cancel_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if request.method == "GET":
@@ -161,6 +165,9 @@ def cancel_order(request, pk):
 
 
 # ADD METHODS
+
+
+@login_required
 def add_new_car_type(request):
     if request.method == "GET":
         form = CarTypeForm()
@@ -174,6 +181,7 @@ def add_new_car_type(request):
     return render(request, "add_or_create/add_car_type.html", {"car_type": form})
 
 
+@login_required
 def add_image(request):
     if request.method == "GET":
         form = ImageForm()
@@ -194,6 +202,7 @@ def add_image(request):
     return render(request, "add_or_create/add_image.html", {"form": form})
 
 
+@login_required
 def add_new_car(request):
     if request.method == "GET":
         form = CarForm()
@@ -212,6 +221,7 @@ def add_new_car(request):
     return render(request, "add_or_create/add_car.html", {"car": form})
 
 
+@login_required
 def add_dealership(request):
     if request.method == "GET":
         form = DealershipForm()
@@ -228,6 +238,7 @@ def add_dealership(request):
 # EDIT METHODS
 
 
+@login_required
 def edit_car(request, pk):
     car = get_object_or_404(Car, pk=pk)
     if request.method == "GET":
