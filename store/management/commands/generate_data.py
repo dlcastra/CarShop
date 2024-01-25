@@ -65,9 +65,9 @@ class Command(BaseCommand):
                     session = boto3.Session(
                         aws_access_key_id=settings.AWS_S3_ACCESS_KEY_ID,
                         aws_secret_access_key=settings.AWS_S3_SECRET_ACCESS_KEY,
-                        region_name=settings.AWS_S3_REGION_NAME
+                        region_name=settings.AWS_S3_REGION_NAME,
                     )
-                    session.resource('s3')
+                    session.resource("s3")
 
                     car_image_name = os.path.basename(car_image_path)
 
