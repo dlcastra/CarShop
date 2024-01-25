@@ -61,3 +61,8 @@ Also E2E and Unit tests are written for the project to run which you need to wri
    ```
    python manage.py runserver 
    ```
+   
+6. To run the tests, write to the console: 
+   ```
+   pytest
+   ```
