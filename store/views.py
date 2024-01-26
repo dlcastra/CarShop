@@ -1,5 +1,6 @@
 import uuid
 
+import requests
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -7,8 +8,10 @@ from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
+from rest_framework.reverse import reverse
 
-
+from apistore.invoices import create_invoice
+from carshop import settings
 from store.forms import (
     ClientForm,
     CarTypeForm,
@@ -136,11 +139,12 @@ def pay_order(request, pk):
                 car.sell()
                 car.owner = client
                 car.save()
+            create_invoice(order, reverse("webhook-mono", request=request))
             order.is_paid = True
             order.save()
             client.order_cart.clear()
-
-            return render(request, "show_or_get/order_success.html")
+            # return render(request, "show_or_get/order_success.html")
+            return redirect(order.invoice_url)
         return render(request, "show_or_get/order_success.html")
 
 

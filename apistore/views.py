@@ -89,7 +89,7 @@ class CreateOrderView(
         client.order_cart.add(car)
 
         return Response(
-            {"message": "Car was added to your cart"}, status=status.HTTP_201_CREATED
+            {"message": "Cars added to the cart"}, status=status.HTTP_201_CREATED
         )
 
 
@@ -122,6 +122,10 @@ class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
                     }
                 )
 
+        client = Client.objects.first()
+        client.order_cart.clear()
+        return Response({"message": "Cart is empty"})
+
     def post(self, request, *args, **kwargs):
         order = self.get_object()
 
@@ -152,7 +156,8 @@ class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
 
 
 class MonoAcquiringWebhookReceiver(APIView):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             verify_signature(request)
         except Exception:

@@ -31,7 +31,8 @@ class CarSerializer(serializers.ModelSerializer):
             "price",
         ]
 
-    def get_price(self, obj):
+    @staticmethod
+    def get_price(obj):
         car_type = obj.car_type
         if car_type:
             return car_type.price
@@ -44,3 +45,12 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "client", "dealership", "is_paid", "cars"]
+
+
+class OrderQuantitySerializer(serializers.Serializer):
+    car = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+
+
+class OrderInputSerializer(serializers.Serializer):
+    order = OrderQuantitySerializer(many=True)
