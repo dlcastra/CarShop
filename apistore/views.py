@@ -101,7 +101,9 @@ class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
         order = self.get_object()
 
         if not order.is_paid:
-            order_info = "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
+            order_info = (
+                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
+            )
             headers = {"X-Token": settings.MONOBANK_TOKEN}
             status_check = order_info + order.order_id
             response = requests.get(status_check, headers=headers)
@@ -113,8 +115,12 @@ class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
                 return Response({"message": "Order was successfully paid"})
 
             elif data["status"] == "created":
-                return Response({"message": "You have not paid for your order yet", "invoice": order.invoice_url})
-
+                return Response(
+                    {
+                        "message": "You have not paid for your order yet",
+                        "invoice": order.invoice_url,
+                    }
+                )
 
     def post(self, request, *args, **kwargs):
         order = self.get_object()
