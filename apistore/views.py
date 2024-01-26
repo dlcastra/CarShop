@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -13,6 +14,7 @@ from apistore.serializers import (
     CarTypeSerializer,
     OrderSerializer,
 )
+from carshop import settings
 from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
 
 
@@ -91,9 +93,28 @@ class CreateOrderView(
         )
 
 
-class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericViewSet):
+class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
     queryset = Order.objects.filter(is_paid=False)
     serializer_class = OrderSerializer
+
+    def get(self, request, *args, **kwargs):
+        order = self.get_object()
+
+        if not order.is_paid:
+            order_info = "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
+            headers = {"X-Token": settings.MONOBANK_TOKEN}
+            status_check = order_info + order.order_id
+            response = requests.get(status_check, headers=headers)
+            data = response.json()
+            if data["status"] == "success":
+                order.is_paid = True
+                order.status = "paid"
+                order.save()
+                return Response({"message": "Order was successfully paid"})
+
+            elif data["status"] == "created":
+                return Response({"message": "You have not paid for your order yet", "invoice": order.invoice_url})
+
 
     def post(self, request, *args, **kwargs):
         order = self.get_object()
@@ -108,9 +129,6 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
                 car.save()
 
             create_invoice(order, reverse("webhook-mono", request=request))
-            order.is_paid = True
-            order.status = "paid"
-            order.save()
             return Response(
                 {"invoice": order.invoice_url, "message": "Your invoice"},
                 status=status.HTTP_200_OK,
@@ -135,9 +153,10 @@ class MonoAcquiringWebhookReceiver(APIView):
             return Response({"status": "error"}, status=400)
         reference = request.data.get("reference")
         order = Order.objects.get(id=reference)
-        if order.order_id != request.data.get("invoiceId"):
+        if order.invoice_id != request.data.get("invoiceId"):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
+        order.save()
         if order.status == "success":
             order.is_paid = True
             order.save()
