@@ -18,6 +18,8 @@ class DealershipSerializer(serializers.ModelSerializer):
 
 
 class CarSerializer(serializers.ModelSerializer):
+    price = serializers.SerializerMethodField()
+
     class Meta:
         model = Car
         fields = [
@@ -26,7 +28,14 @@ class CarSerializer(serializers.ModelSerializer):
             "color",
             "year",
             "image",
+            "price",
         ]
+
+    def get_price(self, obj):
+        car_type = obj.car_type
+        if car_type:
+            return car_type.price
+        return None
 
 
 class OrderSerializer(serializers.ModelSerializer):
