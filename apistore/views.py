@@ -88,48 +88,25 @@ class CreateOrderView(
         car.block(order)
         client.order_cart.add(car)
 
-        return Response(
-            {"message": "Cars added to the cart"}, status=status.HTTP_201_CREATED
-        )
+        return Response({"message": "Cars added to the cart"}, status=status.HTTP_201_CREATED)
 
 
-class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
+class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
     queryset = Order.objects.filter(is_paid=False)
     serializer_class = OrderSerializer
-
-    def get(self, request, *args, **kwargs):
-        order = self.get_object()
-
-        if not order.is_paid:
-            order_info = (
-                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
-            )
-            headers = {"X-Token": settings.MONOBANK_TOKEN}
-            status_check = order_info + order.order_id
-            response = requests.get(status_check, headers=headers)
-            data = response.json()
-            if data["status"] == "success":
-                order.is_paid = True
-                order.status = "paid"
-                order.save()
-                return Response({"message": "Order was successfully paid"})
-
-            elif data["status"] == "created":
-                return Response(
-                    {
-                        "message": "You have not paid for your order yet",
-                        "invoice": order.invoice_url,
-                    }
-                )
-
-        client = Client.objects.first()
-        client.order_cart.clear()
-        return Response({"message": "Cart is empty"})
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def post(self, request, *args, **kwargs):
         order = self.get_object()
+        order_info = (
+            "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
+        )
+        headers = {"X-Token": settings.MONOBANK_TOKEN}
+        status_check = order_info + order.order_id
+        response = requests.get(status_check, headers=headers)
+        data = response.json()
 
-        if not order.is_paid:
+        if not order.is_paid and order.status != "created":
             client = order.client
             cars = Car.objects.filter(blocked_by_order=order)
 
@@ -144,6 +121,23 @@ class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
                 status=status.HTTP_200_OK,
             )
 
+        if order.status == "created" and data["status"] == "success":
+            if data["status"] == "success":
+                order.is_paid = True
+                order.status = "paid"
+                order.save()
+                client = Client.objects.first()
+                client.order_cart.clear()
+                return Response({"message": "Order was successfully paid"})
+
+        elif data["status"] == "created":
+            return Response(
+                {
+                    "message": "You have not paid for your order yet",
+                    "invoice": order.invoice_url,
+                }
+            )
+
     def delete(self, request, *args, **kwargs):
         order = self.get_object()
         cars = Car.objects.filter(blocked_by_order=order)
@@ -156,6 +150,7 @@ class CartView(generics.ListAPIView, generics.DestroyAPIView, GenericViewSet):
 
 
 class MonoAcquiringWebhookReceiver(APIView):
+
     @staticmethod
     def post(request):
         try:
