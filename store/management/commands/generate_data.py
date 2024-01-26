@@ -48,6 +48,11 @@ class Command(BaseCommand):
     help = "Create demo data"
 
     def handle(self, *args, **options):
+        Client.objects.all().delete()
+        CarType.objects.all().delete()
+        Dealership.objects.all().delete()
+        Car.objects.all().delete()
+
         Client.objects.create(
             name="Oleksandr", email="alex@example.com", phone="+380667676769"
         )
