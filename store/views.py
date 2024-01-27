@@ -119,6 +119,14 @@ def create_order(request, pk):
     return redirect("redirect_on_store_page")
 
 
+def get_total_price(order):
+    amount = 0
+    for qty in order.car_types.all():
+        sum_ = qty.car_type.price * qty.quantity
+        amount += sum_
+    return amount
+
+
 def view_cart(request):
     if request.method == "GET":
         return redirect(redirect_on_store_page)
@@ -126,10 +134,11 @@ def view_cart(request):
         client = Client.objects.first()
         user_cars = client.order_cart.all()
         order = Order.objects.filter(client=client, is_paid=False).first()
+        total_price = get_total_price(order) if order else 0
         return render(
             request,
             "show_or_get/cart_page.html",
-            {"user_cars": user_cars, "order": order},
+            {"user_cars": user_cars, "order": order, "total_price": total_price},
         )
 
 
@@ -184,6 +193,8 @@ def cancel_order(request, pk):
         cars = Car.objects.filter(blocked_by_order=order)
         for car in cars:
             car.unblock()
+        client = Client.objects.first()
+        client.order_cart.clear()
         order.delete()
 
         return render(request, "show_or_get/order_cancel.html")
