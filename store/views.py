@@ -1,5 +1,6 @@
 import uuid
 
+import requests
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -10,6 +11,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.reverse import reverse
 
 from apistore.invoices import create_invoice
+from carshop import settings
 from store.forms import (
     ClientForm,
     CarTypeForm,
@@ -90,20 +92,29 @@ def redirect_on_store_page(request):
 @login_required
 def create_order(request, pk):
     car = get_object_or_404(Car, pk=pk)
-    if car.blocked_by_order or car.owner:
-        return redirect("redirect_on_store_page")
+    client = Client.objects.first()
+    car_type = car.car_type
+    dealership = car_type.dealerships.first()
 
-    if request.method == "POST":
-        client = Client.objects.first()
-        order, created = Order.objects.get_or_create(
-            client=client, dealership=car.car_type.dealerships.first(), is_paid=False
+    order = Order.objects.filter(
+        client=client, dealership=dealership, is_paid=False
+    ).first()
+
+    if not order or order.is_paid:
+        order = Order.objects.create(
+            client=client, dealership=dealership, is_paid=False
         )
-        car_type = car.car_type
-        order_quantity, _ = OrderQuantity.objects.get_or_create(
-            order=order, car_type=car_type
-        )
-        car.block(order)
-        client.order_cart.add(car)
+
+    order_quantity, created = OrderQuantity.objects.get_or_create(
+        order=order, car_type=car_type
+    )
+
+    if not created:
+        order_quantity.quantity += 1
+        order_quantity.save()
+
+    car.block(order)
+    client.order_cart.add(car)
 
     return redirect("redirect_on_store_page")
 
@@ -130,18 +141,35 @@ def pay_order(request, pk):
         return render(request, "show_or_get/order_success.html")
 
     if request.method == "POST":
+        if order.status:
+            order_info = (
+                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
+            )
+            headers = {"X-Token": settings.MONOBANK_TOKEN}
+            status_check = order_info + order.order_id
+            response = requests.get(status_check, headers=headers)
+            data = response.json()
+
+            if order.status == "created" and data["status"] == "success":
+                if data["status"] == "success":
+                    order.is_paid = True
+                    order.status = "paid"
+                    order.save()
+
+                    client = Client.objects.first()
+                    client.order_cart.clear()
+                    return render(request, "show_or_get/order_success.html")
+
         if not order.is_paid:
-            client = Client.objects.first()
+            client = order.client
             cars = Car.objects.filter(blocked_by_order=order)
+
             for car in cars:
                 car.sell()
                 car.owner = client
                 car.save()
+
             create_invoice(order, reverse("webhook-mono", request=request))
-            order.is_paid = True
-            order.save()
-            client.order_cart.clear()
-            # return render(request, "show_or_get/order_success.html")
             return redirect(order.invoice_url)
         return render(request, "show_or_get/order_success.html")
 

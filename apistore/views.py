@@ -158,6 +158,8 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
             car.owner = None
             car.save()
 
+        client = Client.objects.first()
+        client.order_cart.clear()
         order.delete()
 
         return Response({"message": "The order was successfully canceled"})
