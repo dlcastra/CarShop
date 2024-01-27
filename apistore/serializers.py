@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from rest_framework import serializers
 
 from store.models import Car, CarType, Dealership, Order
@@ -32,7 +33,7 @@ class CarSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def get_price(obj):
+    def get_price(obj: Car):
         car_type = obj.car_type
         if car_type:
             return car_type.price
@@ -40,20 +41,25 @@ class CarSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    # cars = CarSerializer(many=True, read_only=True)
     price = serializers.SerializerMethodField()
+    qty = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
-        fields = ["id", "client", "dealership", "is_paid", "price"]
+        fields = ["id", "client", "dealership", "is_paid", "price", "qty"]
 
     @staticmethod
-    def get_price(obj):
+    def get_price(obj: Order):
         amount = 0
         for qty in obj.car_types.all():
             sum_ = qty.car_type.price * qty.quantity
             amount += sum_
         return amount
+
+    @staticmethod
+    def get_qty(obj: Order):
+        order_quantity = obj.car_types.aggregate(Sum("quantity"))
+        return order_quantity["quantity__sum"] if order_quantity else None
 
 
 class OrderQuantitySerializer(serializers.Serializer):
