@@ -9,16 +9,30 @@
 {% bootstrap_javascript %}
 <h1>Ваша корзина</h1>
 <ul>
+    <h3>Додані авто:</h3>
     {% for car in user_cars %}
-        <li>
+        <div>
             <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
             <em>Рік випуску: {{ car.year }}</em><br>
             <em>Ціна: ${{ car.car_type.price }}</em><br>
             <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
-        </li>
-        {% empty %}
-        <p>Ваша корзина порожня.</p>
+            <p></p>
+            {% empty %}
+        </div>
+        <hr>
     {% endfor %}
+
+    {% if order %}
+        <div>
+            <h3>Загальна інформація:</h3>
+            <em>ID замовлення: {{ order.id }}</em><br>
+            <em>ID клієета: {{ order.client.id }}</em><br>
+            <em>ID продавця: {{ order.dealership.id }}</em><br>
+            <em>Ціна: {{ total_price }}</em><br>
+
+        </div>
+    {% endif %}
+
 </ul>
 
 {% if order.id %}
