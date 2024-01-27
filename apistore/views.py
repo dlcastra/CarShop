@@ -70,25 +70,33 @@ class CreateOrderView(
     @staticmethod
     def post(request, pk):
         car = get_object_or_404(Car, pk=pk)
-        if car.blocked_by_order or car.owner:
-            return Response(
-                {"error": "Car is blocked or already owned"},
-                status=status.HTTP_400_BAD_REQUEST,
+        client = Client.objects.first()
+        car_type = car.car_type
+        dealership = car_type.dealerships.first()
+
+        order = Order.objects.filter(
+            client=client, dealership=dealership, is_paid=False
+        ).first()
+
+        if not order or order.is_paid:
+            order = Order.objects.create(
+                client=client, dealership=dealership, is_paid=False
             )
 
-        client = Client.objects.first()
-        order, created = Order.objects.get_or_create(
-            client=client, dealership=car.car_type.dealerships.first(), is_paid=False
-        )
-
-        car_type = car.car_type
-        order_quantity, _ = OrderQuantity.objects.get_or_create(
+        order_quantity, created = OrderQuantity.objects.get_or_create(
             order=order, car_type=car_type
         )
+
+        if not created:
+            order_quantity.quantity += 1
+            order_quantity.save()
+
         car.block(order)
         client.order_cart.add(car)
 
-        return Response({"message": "Cars added to the cart"}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Cars added to the cart"}, status=status.HTTP_201_CREATED
+        )
 
 
 class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
@@ -113,6 +121,7 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
                     order.is_paid = True
                     order.status = "paid"
                     order.save()
+
                     client = Client.objects.first()
                     client.order_cart.clear()
                     return Response({"message": "Order was successfully paid"})
@@ -146,13 +155,15 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
 
         for car in cars:
             car.unblock()
+            car.owner = None
+            car.save()
+
         order.delete()
 
         return Response({"message": "The order was successfully canceled"})
 
 
 class MonoAcquiringWebhookReceiver(APIView):
-
     @staticmethod
     def post(request):
         try:

@@ -40,11 +40,20 @@ class CarSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    cars = CarSerializer(many=True, read_only=True)
+    # cars = CarSerializer(many=True, read_only=True)
+    price = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
-        fields = ["id", "client", "dealership", "is_paid", "cars"]
+        fields = ["id", "client", "dealership", "is_paid", "price"]
+
+    @staticmethod
+    def get_price(obj):
+        amount = 0
+        for qty in obj.car_types.all():
+            sum_ = qty.car_type.price * qty.quantity
+            amount += sum_
+        return amount
 
 
 class OrderQuantitySerializer(serializers.Serializer):
