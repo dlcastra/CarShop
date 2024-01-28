@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
@@ -151,6 +151,7 @@ class MonoAcquiringWebhookReceiver(APIView):
         order.save()
         if order.status == "success":
             order.is_paid = True
+            order.status = "paid"
             order.save()
             return Response({"status": "Paid"}, status=200)
         return Response({"status": "ok"})
