@@ -1,4 +1,3 @@
-import requests
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -14,7 +13,6 @@ from apistore.serializers import (
     CarTypeSerializer,
     OrderSerializer,
 )
-from carshop import settings
 from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
 
 
@@ -107,33 +105,6 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
     def post(self, request, *args, **kwargs):
         order = self.get_object()
 
-        if order.status:
-            order_info = (
-                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
-            )
-            headers = {"X-Token": settings.MONOBANK_TOKEN}
-            status_check = order_info + order.order_id
-            response = requests.get(status_check, headers=headers)
-            data = response.json()
-
-            if order.status == "created" and data["status"] == "success":
-                if data["status"] == "success":
-                    order.is_paid = True
-                    order.status = "paid"
-                    order.save()
-
-                    client = Client.objects.first()
-                    client.order_cart.clear()
-                    return Response({"message": "Order was successfully paid"})
-
-            elif data["status"] == "created":
-                return Response(
-                    {
-                        "message": "You have not paid for your order yet",
-                        "invoice": order.invoice_url,
-                    }
-                )
-
         if not order.is_paid:
             client = order.client
             cars = Car.objects.filter(blocked_by_order=order)
@@ -178,8 +149,13 @@ class MonoAcquiringWebhookReceiver(APIView):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
         order.save()
+
         if order.status == "success":
             order.is_paid = True
+            order.status = "paid"
             order.save()
+
+            client = Client.objects.first()
+            client.order_cart.clear()
             return Response({"status": "Paid"}, status=200)
         return Response({"status": "ok"})
