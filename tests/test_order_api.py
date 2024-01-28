@@ -28,6 +28,7 @@ def test_get_order_detail(sample_car, sample_car_type):
         "color": sample_car.color,
         "year": sample_car.year,
         "image": sample_car.image,
+        "price": sample_car.car_type.price,
     }
 
 
@@ -47,7 +48,7 @@ def test_create_order(sample_user, sample_car, sample_car_type):
     response = sample_user.post(url)
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert "Car was added to your cart" in response.data.get("message", "")
+    assert "Cars added to the cart" in response.data.get("message", "")
 
 
 @pytest.mark.django_db

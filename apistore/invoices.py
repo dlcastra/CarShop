@@ -34,7 +34,11 @@ def create_invoice(order: Order, webhook_url):
         sum_ = (qty.car_type.price * qty.quantity) * 100
         amount += sum_
         basket_order.append(
-            {"name": qty.car_type.name, "qty": qty.quantity, "sum": sum_}
+            {
+                "name": qty.car_type.name,
+                "qty": qty.quantity,
+                "sum": sum_,
+            }
         )
 
     merchants_info = {

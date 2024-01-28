@@ -68,32 +68,39 @@ class CreateOrderView(
     @staticmethod
     def post(request, pk):
         car = get_object_or_404(Car, pk=pk)
-        if car.blocked_by_order or car.owner:
-            return Response(
-                {"error": "Car is blocked or already owned"},
-                status=status.HTTP_400_BAD_REQUEST,
+        client = Client.objects.first()
+        car_type = car.car_type
+        dealership = car_type.dealerships.first()
+
+        order = Order.objects.filter(
+            client=client, dealership=dealership, is_paid=False
+        ).first()
+
+        if not order or order.is_paid:
+            order = Order.objects.create(
+                client=client, dealership=dealership, is_paid=False
             )
 
-        client = Client.objects.first()
-        order, created = Order.objects.get_or_create(
-            client=client, dealership=car.car_type.dealerships.first(), is_paid=False
-        )
-
-        car_type = car.car_type
-        order_quantity, _ = OrderQuantity.objects.get_or_create(
+        order_quantity, created = OrderQuantity.objects.get_or_create(
             order=order, car_type=car_type
         )
+
+        if not created:
+            order_quantity.quantity += 1
+            order_quantity.save()
+
         car.block(order)
         client.order_cart.add(car)
 
         return Response(
-            {"message": "Car was added to your cart"}, status=status.HTTP_201_CREATED
+            {"message": "Cars added to the cart"}, status=status.HTTP_201_CREATED
         )
 
 
-class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericViewSet):
+class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
     queryset = Order.objects.filter(is_paid=False)
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def post(self, request, *args, **kwargs):
         order = self.get_object()
@@ -108,9 +115,6 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
                 car.save()
 
             create_invoice(order, reverse("webhook-mono", request=request))
-            order.is_paid = True
-            order.status = "paid"
-            order.save()
             return Response(
                 {"invoice": order.invoice_url, "message": "Your invoice"},
                 status=status.HTTP_200_OK,
@@ -122,24 +126,36 @@ class CartView(generics.ListAPIView, generics.RetrieveUpdateAPIView, GenericView
 
         for car in cars:
             car.unblock()
+            car.owner = None
+            car.save()
+
+        client = Client.objects.first()
+        client.order_cart.clear()
         order.delete()
 
         return Response({"message": "The order was successfully canceled"})
 
 
 class MonoAcquiringWebhookReceiver(APIView):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         try:
             verify_signature(request)
         except Exception:
             return Response({"status": "error"}, status=400)
         reference = request.data.get("reference")
         order = Order.objects.get(id=reference)
-        if order.order_id != request.data.get("invoiceId"):
+        if order.invoice_id != request.data.get("invoiceId"):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
+        order.save()
+
         if order.status == "success":
             order.is_paid = True
+            order.status = "paid"
             order.save()
+
+            client = Client.objects.first()
+            client.order_cart.clear()
             return Response({"status": "Paid"}, status=200)
         return Response({"status": "ok"})

@@ -28,6 +28,7 @@ def test_get_car_detail(sample_user):
         "color": car.color,
         "year": car.year,
         "image": car.image,
+        "price": car.car_type.price,
     }
     assert response.status_code != status.HTTP_404_NOT_FOUND
 
