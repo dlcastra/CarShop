@@ -137,11 +137,11 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
 
 
 class MonoAcquiringWebhookReceiver(APIView):
-    @staticmethod
-    def post(request):
+
+    def post(self, request):
         try:
             verify_signature(request)
-        except Exception:
+        except Exception as e:
             return Response({"status": "error"}, status=400)
         reference = request.data.get("reference")
         order = Order.objects.get(id=reference)
@@ -149,13 +149,8 @@ class MonoAcquiringWebhookReceiver(APIView):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
         order.save()
-
         if order.status == "success":
             order.is_paid = True
-            order.status = "paid"
             order.save()
-
-            client = Client.objects.first()
-            client.order_cart.clear()
             return Response({"status": "Paid"}, status=200)
         return Response({"status": "ok"})
