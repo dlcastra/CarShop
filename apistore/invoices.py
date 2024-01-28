@@ -52,6 +52,7 @@ def create_invoice(order: Order, webhook_url):
         "merchantPaymInfo": merchants_info,
     }
     headers = {"X-Token": settings.MONOBANK_TOKEN}
+    print(request_body)
 
     request = requests.post(
         "https://api.monobank.ua/api/merchant/invoice/create",
