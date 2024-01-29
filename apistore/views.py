@@ -159,5 +159,4 @@ class MonoAcquiringWebhookReceiver(APIView):
             client = Client.objects.first()
             client.order_cart.clear()
             return Response({"status": "Paid"}, status=200)
-
         return Response({"status": "ok"})
