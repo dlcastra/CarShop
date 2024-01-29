@@ -216,7 +216,6 @@ def cancel_order(request, pk):
 # ADD METHODS
 
 
-@login_required
 def add_new_car_type(request):
     if request.method == "GET":
         form = CarTypeForm()
@@ -251,7 +250,6 @@ def add_image(request):
     return render(request, "add_or_create/add_image.html", {"form": form})
 
 
-@login_required
 def add_new_car(request):
     if request.method == "GET":
         form = CarForm()
@@ -270,7 +268,6 @@ def add_new_car(request):
     return render(request, "add_or_create/add_car.html", {"car": form})
 
 
-@login_required
 def add_dealership(request):
     if request.method == "GET":
         form = DealershipForm()
