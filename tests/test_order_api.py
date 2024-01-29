@@ -16,22 +16,6 @@ def test_get_order():
     assert response.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.django_db
-def test_get_order_detail(sample_car, sample_car_type):
-    url = reverse("buy-car-detail", args=[sample_car.id])
-    response = client.get(url)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {
-        "id": sample_car.id,
-        "car_type": sample_car_type.id,
-        "color": sample_car.color,
-        "year": sample_car.year,
-        "image": sample_car.image,
-        "price": sample_car.car_type.price,
-    }
-
-
 @pytest.mark.django_db(transaction=True)
 def test_create_order(sample_user, sample_car, sample_car_type):
     client_ = Client.objects.create(

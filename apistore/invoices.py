@@ -13,6 +13,7 @@ def verify_signature(request):
     x_sign_base64 = request.headers["X-Sign"]
 
     body_bytes = request.body
+    print(body_bytes)
     pub_key_bytes = base64.b64decode(pub_key_base64)
     signature_bytes = base64.b64decode(x_sign_base64)
     pub_key = ecdsa.VerifyingKey.from_pem(pub_key_bytes.decode())

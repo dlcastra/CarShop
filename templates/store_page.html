@@ -26,10 +26,32 @@
             height: 100%; /* Ensure the image takes up the entire height of the container */
             object-fit: cover; /* Maintain aspect ratio and cover the entire container */
         }
+
+        .pagination {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+        }
+
+        .search-form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 20vh;
+        }
+
+        .search-form {
+            width: 300px;
+        }
     </style>
 
 </head>
-<body style="background-color: #508bfc; color: #1E1E1E">
+<body style="background-color: #508bfc; color: #1E1E1E; margin-bottom: 50px;">
 <form method="POST" action="{% url 'view_cart' %}">
     {% csrf_token %}
     <div class="cart-button">
@@ -40,6 +62,21 @@
 </form>
 <div class="container cars-container">
     <h1>Доступні Автомобілі</h1>
+    <h1></h1>
+    <div class="search-form-container">
+        <form method="get" action="{% url 'redirect_on_store_page' %}" class="search-form">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="search" placeholder="По назві" value="{{ search_query }}">
+                <button class="btn btn-secondary" type="submit">Шукати</button>
+            </div>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="year" placeholder="По даті випуску"
+                       value="{{ year_query }}">
+                <button class="btn btn-secondary" type="submit">Шукати</button>
+            </div>
+        </form>
+    </div>
+    <h1></h1>
     <div class="row">
         {% for car in cars %}
             <div class="col-md-4">
@@ -56,7 +93,7 @@
                         {% if car.image %}
                             <a href="{{ car.image.url }}" target="_blank">
                                 <img src="{{ car.image.url }}" alt="{{ car.name }} Image"
-                                     style="max-width: 300px; height: auto" >
+                                     style="max-width: 300px; height: auto">
                             </a>
                         {% else %}
                             <p>No Image Available</p>
@@ -72,10 +109,34 @@
                     </div>
                 </div>
             </div>
-        {% empty %}
+            {% empty %}
             <p>На даний момент немає доступних автомобілів.</p>
         {% endfor %}
+        <div class="pagination">
+        <span class="step-links">
+            {% if cars.has_previous %}
+                <a href="?page=1" class="btn btn-secondary">&laquo; Перша</a>
+                <a href="?page={{ cars.previous_page_number }}" class="btn btn-secondary">Попередня</a>
+            {% endif %}
+
+            <span class="current btn btn-light">
+                Page {{ cars.number }} of {{ cars.paginator.num_pages }}.
+            </span>
+
+            {% if cars.has_next %}
+                <a href="?page={{ cars.next_page_number }}" class="btn btn-secondary">Наступна</a>
+                <a href="?page={{ cars.paginator.num_pages }}" class="btn btn-secondary">Остання &raquo;</a>
+            {% endif %}
+            <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p>тут могла бути ваша реклама</p>
+        </span>
+        </div>
     </div>
+
 </div>
 </body>
 </html>

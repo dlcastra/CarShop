@@ -1,5 +1,7 @@
+import django_filters.rest_framework
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -36,6 +38,9 @@ class CarViewSet(
     queryset = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
     serializer_class = CarSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend, SearchFilter]
+    filterset_fields = ["year"]
+    search_fields = ["car_type__name"]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -54,6 +59,8 @@ class DealersViewSet(
     queryset = Dealership.objects.all()
     serializer_class = DealershipSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
 
 
 class CreateOrderView(
@@ -114,7 +121,6 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
                 car.owner = client
                 car.save()
 
-            # create_invoice(order, "https://webhook.site/ed779803-195e-4d54-88e6-6036da3be51e")
             create_invoice(order, reverse("webhook-mono", request=request))
             return Response(
                 {"invoice": order.invoice_url, "message": "Your invoice"},
@@ -138,7 +144,6 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
 
 
 class MonoAcquiringWebhookReceiver(APIView):
-
     def post(self, request):
         try:
             verify_signature(request)

@@ -1,17 +1,17 @@
 import uuid
 
-import requests
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.signing import Signer, BadSignature
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.reverse import reverse
 
 from apistore.invoices import create_invoice
-from carshop import settings
 from store.forms import (
     ClientForm,
     CarTypeForm,
@@ -86,7 +86,29 @@ def activate(request, user_signed):
 
 def redirect_on_store_page(request):
     car_list = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
-    return render(request, "store_page.html", {"cars": car_list})
+
+    search_query = request.GET.get("search", "")
+    if search_query:
+        car_list = car_list.filter(Q(car_type__name__icontains=search_query))
+
+    year_query = request.GET.get("year", "")
+    if year_query:
+        car_list = car_list.filter(year=year_query)
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(car_list, 36)
+    try:
+        cars = paginator.page(page)
+    except PageNotAnInteger:
+        cars = paginator.page(1)
+    except EmptyPage:
+        cars = paginator.page(paginator.num_pages)
+
+    return render(
+        request,
+        "store_page.html",
+        {"cars": cars, "search_query": search_query, "year_query": year_query},
+    )
 
 
 @login_required
@@ -153,25 +175,6 @@ def pay_order(request, pk):
         return render(request, "show_or_get/order_success.html")
 
     if request.method == "POST":
-        if order.status:
-            order_info = (
-                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
-            )
-            headers = {"X-Token": settings.MONOBANK_TOKEN}
-            status_check = order_info + order.order_id
-            response = requests.get(status_check, headers=headers)
-            data = response.json()
-
-            if order.status == "created" and data["status"] == "success":
-                if data["status"] == "success":
-                    order.is_paid = True
-                    order.status = "paid"
-                    order.save()
-
-                    client = Client.objects.first()
-                    client.order_cart.clear()
-                    return render(request, "show_or_get/order_success.html")
-
         if not order.is_paid:
             client = order.client
             cars = Car.objects.filter(blocked_by_order=order)
@@ -183,7 +186,9 @@ def pay_order(request, pk):
 
             create_invoice(order, reverse("webhook-mono", request=request))
             return redirect(order.invoice_url)
-        return render(request, "show_or_get/order_success.html")
+
+        if order.status == "paid":
+            return render(request, "show_or_get/order_success.html")
 
 
 @login_required
@@ -318,4 +323,23 @@ def get_all_cars(request):
 
 def get_all_dealership(request):
     dealership_list = Dealership.objects.all()
-    return render(request, "show_or_get/all_dealers.html", {"dealer": dealership_list})
+
+    search_query = request.GET.get("search", "")
+    if search_query:
+        dealership_list = dealership_list.filter(
+            Q(name=search_query)
+        )
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(dealership_list, 36)
+    try:
+        dealers = paginator.page(page)
+    except PageNotAnInteger:
+        dealers = paginator.page(1)
+    except EmptyPage:
+        dealers = paginator.page(paginator.num_pages)
+    return render(
+        request,
+        "show_or_get/all_dealers.html",
+        {"dealer_list": dealership_list, "dealers": dealers, "search_query": search_query},
+    )
