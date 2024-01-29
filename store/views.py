@@ -1,6 +1,5 @@
 import uuid
 
-import requests
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -8,11 +7,11 @@ from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.signing import Signer, BadSignature
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.reverse import reverse
 
 from apistore.invoices import create_invoice
-from carshop import settings
 from store.forms import (
     ClientForm,
     CarTypeForm,
@@ -22,7 +21,6 @@ from store.forms import (
     ImageForm,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity, Image
-from django.db.models import Q
 
 """ --- CLIENT PART --- """
 
@@ -177,25 +175,6 @@ def pay_order(request, pk):
         return render(request, "show_or_get/order_success.html")
 
     if request.method == "POST":
-        if order.status:
-            order_info = (
-                "https://api.monobank.ua/api/merchant/invoice/status?invoiceId="
-            )
-            headers = {"X-Token": settings.MONOBANK_TOKEN}
-            status_check = order_info + order.order_id
-            response = requests.get(status_check, headers=headers)
-            data = response.json()
-
-            if order.status == "created" and data["status"] == "success":
-                if data["status"] == "success":
-                    order.is_paid = True
-                    order.status = "paid"
-                    order.save()
-
-                    client = Client.objects.first()
-                    client.order_cart.clear()
-                    return render(request, "show_or_get/order_success.html")
-
         if not order.is_paid:
             client = order.client
             cars = Car.objects.filter(blocked_by_order=order)
@@ -207,7 +186,9 @@ def pay_order(request, pk):
 
             create_invoice(order, reverse("webhook-mono", request=request))
             return redirect(order.invoice_url)
-        return render(request, "show_or_get/order_success.html")
+
+        if order.status == "paid":
+            return render(request, "show_or_get/order_success.html")
 
 
 @login_required
