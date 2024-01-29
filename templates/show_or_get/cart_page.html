@@ -29,14 +29,13 @@
             <em>ID клієета: {{ order.client.id }}</em><br>
             <em>ID продавця: {{ order.dealership.id }}</em><br>
             <em>Ціна: {{ total_price }}</em><br>
-
         </div>
     {% endif %}
 
 </ul>
 
 {% if order.id %}
-    <form method="POST" action="{% url 'pay_order' order.id %}">
+    <form method="POST" action="{% url 'pay_order' order.id %}" target="_blank">
         {% csrf_token %}
         <input type="submit" class="btn btn-success" name="redirect_on_store_page" value="Сплатити">
     </form>
@@ -46,7 +45,6 @@
         <input type="submit" class="btn btn-danger" name="redirect_on_store_page" value="Відмінити замовлення">
     </form>
     <p></p>
-
 {% endif %}
 
 <form method="GET" action="{% url 'view_cart' %}">
