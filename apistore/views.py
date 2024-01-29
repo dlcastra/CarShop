@@ -143,11 +143,11 @@ class MonoAcquiringWebhookReceiver(APIView):
         try:
             verify_signature(request)
         except Exception as e:
-            return Response({"status": "error1"}, status=400)
+            return Response({"status": "error"}, status=400)
         reference = request.data.get("reference")
         order = Order.objects.get(id=reference)
         if order.order_id != request.data.get("invoiceId"):
-            return Response({"status": "error2"}, status=400)
+            return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
         order.save()
 
