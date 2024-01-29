@@ -20,7 +20,6 @@ class DealershipSerializer(serializers.ModelSerializer):
 
 class CarSerializer(serializers.ModelSerializer):
     car_type_details = CarTypeSerializer(source="car_type", read_only=True)
-    price = serializers.SerializerMethodField()
 
     class Meta:
         model = Car
@@ -30,16 +29,8 @@ class CarSerializer(serializers.ModelSerializer):
             "color",
             "year",
             "image",
-            "price",
             "car_type_details",
         ]
-
-    @staticmethod
-    def get_price(obj: Car):
-        car_type = obj.car_type
-        if car_type:
-            return car_type.price
-        return None
 
 
 class OrderSerializer(serializers.ModelSerializer):

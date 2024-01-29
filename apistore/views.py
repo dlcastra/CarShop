@@ -2,6 +2,7 @@ import django_filters.rest_framework
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -16,6 +17,10 @@ from apistore.serializers import (
     OrderSerializer,
 )
 from store.models import Car, Dealership, CarType, Client, Order, OrderQuantity
+
+
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 100
 
 
 class CarTypeViewSet(
@@ -37,6 +42,7 @@ class CarViewSet(
 ):
     queryset = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
     serializer_class = CarSerializer
+    pagination_class = CustomPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend, SearchFilter]
     filterset_fields = ["year"]
@@ -58,6 +64,7 @@ class DealersViewSet(
 ):
     queryset = Dealership.objects.all()
     serializer_class = DealershipSerializer
+    pagination_class = CustomPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [SearchFilter]
     search_fields = ["name"]
@@ -70,6 +77,7 @@ class CreateOrderView(
 ):
     queryset = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
     serializer_class = CarSerializer
+    pagination_class = CustomPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @staticmethod

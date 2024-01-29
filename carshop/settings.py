@@ -241,8 +241,5 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
-    "DEFAULT_PAGINATION_CLASS": "apistore.pagination.limited_pagination.LimitedPagination",
-    "PAGE_SIZE": 100,
-    "max_limit": 100,
 }
 MONOBANK_TOKEN = os.getenv("MONOBANK_TOKEN")

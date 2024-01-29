@@ -7,6 +7,19 @@ paths:
   /api/cars-api:
     get:
       summary: Get a list of cars
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          description: The number of items to return
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          required: false
+          description: The offset from the beginning of the result set
+          schema:
+            type: integer
       responses:
         '200':
           description: A successful response
@@ -18,12 +31,24 @@ paths:
                   color: "SomeColor"
                   "year": 2024
                   "image": "https://example.s3.amazonaws.com"
+                  "car_type_details": {
+                    "id": 1,
+                    "name": SomeName,
+                    "brand": SomeBrand,
+                    "price": 10000
+                  }
 
                 - id: 2
-                  car_type: 2
+                  car_type: 1
                   color: "SomeColor"
                   "year": 2024
                   "image": "https://example.s3.amazonaws.com"
+                  "car_type_details": {
+                    "id": 1,
+                    "name": SomeName,
+                    "brand": SomeBrand,
+                    "price": 10000
+                  }
         '405':
           description: Incorrect method
         '500':
@@ -132,6 +157,19 @@ paths:
   /api/dealers-api:
     get:
       summary: Get a list of dealers
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          description: The number of items to return
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          required: false
+          description: The offset from the beginning of the result set
+          schema:
+            type: integer
       responses:
         '200':
           description: A successful response
@@ -262,6 +300,13 @@ paths:
   /api/create-order/{pk}:
     get:
       summary: Get a car to place an order
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          description: The number of items to return
+          schema:
+            type: integer
       responses:
         '200':
           description: A successful response
