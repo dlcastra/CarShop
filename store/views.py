@@ -121,9 +121,13 @@ def create_order(request, pk):
     order = Order.objects.filter(client=client, is_paid=False).first()
 
     if not order:
-        order = Order.objects.create(client=client, dealership=dealership, is_paid=False)
+        order = Order.objects.create(
+            client=client, dealership=dealership, is_paid=False
+        )
 
-    order_quantity, created = OrderQuantity.objects.get_or_create(order=order, car_type=car_type)
+    order_quantity, created = OrderQuantity.objects.get_or_create(
+        order=order, car_type=car_type
+    )
 
     if not created:
         order_quantity.quantity += 1
@@ -314,9 +318,7 @@ def get_all_dealership(request):
 
     search_query = request.GET.get("search", "")
     if search_query:
-        dealership_list = dealership_list.filter(
-            Q(name=search_query)
-        )
+        dealership_list = dealership_list.filter(Q(name=search_query))
 
     page = request.GET.get("page", 1)
     paginator = Paginator(dealership_list, 36)
@@ -329,5 +331,9 @@ def get_all_dealership(request):
     return render(
         request,
         "show_or_get/all_dealers.html",
-        {"dealer_list": dealership_list, "dealers": dealers, "search_query": search_query},
+        {
+            "dealer_list": dealership_list,
+            "dealers": dealers,
+            "search_query": search_query,
+        },
     )
