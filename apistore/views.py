@@ -114,6 +114,7 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
                 car.owner = client
                 car.save()
 
+            # create_invoice(order, "https://webhook.site/ed779803-195e-4d54-88e6-6036da3be51e")
             create_invoice(order, reverse("webhook-mono", request=request))
             return Response(
                 {"invoice": order.invoice_url, "message": "Your invoice"},
@@ -137,15 +138,15 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
 
 
 class MonoAcquiringWebhookReceiver(APIView):
-    @staticmethod
-    def post(request):
+
+    def post(self, request):
         try:
             verify_signature(request)
-        except Exception:
+        except Exception as e:
             return Response({"status": "error"}, status=400)
         reference = request.data.get("reference")
         order = Order.objects.get(id=reference)
-        if order.invoice_id != request.data.get("invoiceId"):
+        if order.order_id != request.data.get("invoiceId"):
             return Response({"status": "error"}, status=400)
         order.status = request.data.get("status", "error")
         order.save()
