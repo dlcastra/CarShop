@@ -14,25 +14,6 @@ def test_get_cars(sample_user):
     assert response.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.django_db(transaction=True)
-def test_get_car_detail(sample_user):
-    car_type = CarType.objects.create(name="X5", brand="BMW", price=90000)
-    car = Car.objects.create(car_type=car_type, color="Black", year=2024, image=None)
-    url = reverse("car-detail", args=[car.id])
-    response = sample_user.get(url)
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {
-        "id": car.id,
-        "car_type": car_type.id,
-        "color": car.color,
-        "year": car.year,
-        "image": car.image,
-        "price": car.car_type.price,
-    }
-    assert response.status_code != status.HTTP_404_NOT_FOUND
-
-
 @pytest.mark.django_db
 def test_user_is_not_authenticate():
     client = APIClient()

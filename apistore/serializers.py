@@ -19,6 +19,7 @@ class DealershipSerializer(serializers.ModelSerializer):
 
 
 class CarSerializer(serializers.ModelSerializer):
+    car_type_details = CarTypeSerializer(source="car_type", read_only=True)
     price = serializers.SerializerMethodField()
 
     class Meta:
@@ -30,6 +31,7 @@ class CarSerializer(serializers.ModelSerializer):
             "year",
             "image",
             "price",
+            "car_type_details",
         ]
 
     @staticmethod
