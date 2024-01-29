@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.reverse import reverse
@@ -21,6 +22,7 @@ from store.forms import (
     ImageForm,
 )
 from store.models import Car, CarType, Dealership, Client, Order, OrderQuantity, Image
+from django.db.models import Q
 
 """ --- CLIENT PART --- """
 
@@ -86,7 +88,29 @@ def activate(request, user_signed):
 
 def redirect_on_store_page(request):
     car_list = Car.objects.filter(owner__isnull=True, blocked_by_order__isnull=True)
-    return render(request, "store_page.html", {"cars": car_list})
+
+    search_query = request.GET.get("search", "")
+    if search_query:
+        car_list = car_list.filter(Q(car_type__name__icontains=search_query))
+
+    year_query = request.GET.get("year", "")
+    if year_query:
+        car_list = car_list.filter(year=year_query)
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(car_list, 36)
+    try:
+        cars = paginator.page(page)
+    except PageNotAnInteger:
+        cars = paginator.page(1)
+    except EmptyPage:
+        cars = paginator.page(paginator.num_pages)
+
+    return render(
+        request,
+        "store_page.html",
+        {"cars": cars, "search_query": search_query, "year_query": year_query},
+    )
 
 
 @login_required
@@ -318,4 +342,23 @@ def get_all_cars(request):
 
 def get_all_dealership(request):
     dealership_list = Dealership.objects.all()
-    return render(request, "show_or_get/all_dealers.html", {"dealer": dealership_list})
+
+    search_query = request.GET.get("search", "")
+    if search_query:
+        dealership_list = dealership_list.filter(
+            Q(name=search_query)
+        )
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(dealership_list, 36)
+    try:
+        dealers = paginator.page(page)
+    except PageNotAnInteger:
+        dealers = paginator.page(1)
+    except EmptyPage:
+        dealers = paginator.page(paginator.num_pages)
+    return render(
+        request,
+        "show_or_get/all_dealers.html",
+        {"dealer_list": dealership_list, "dealers": dealers, "search_query": search_query},
+    )
