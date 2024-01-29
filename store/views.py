@@ -118,11 +118,9 @@ def create_order(request, pk):
     car_type = car.car_type
     dealership = car_type.dealerships.first()
 
-    order = Order.objects.filter(
-        client=client, dealership=dealership, is_paid=False
-    ).first()
+    order = Order.objects.filter(client=client, is_paid=False).first()
 
-    if not order or order.is_paid:
+    if not order:
         order = Order.objects.create(
             client=client, dealership=dealership, is_paid=False
         )
@@ -164,9 +162,6 @@ def view_cart(request):
         )
 
 
-# TODO:
-#  1. Добавить отдельные кнопки для каждого отдельного заказа.
-#  2. Добавить логику которая будет убирать оплоченый заказ из корзины
 @login_required
 def pay_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
@@ -216,7 +211,6 @@ def cancel_order(request, pk):
 # ADD METHODS
 
 
-@login_required
 def add_new_car_type(request):
     if request.method == "GET":
         form = CarTypeForm()
@@ -251,7 +245,6 @@ def add_image(request):
     return render(request, "add_or_create/add_image.html", {"form": form})
 
 
-@login_required
 def add_new_car(request):
     if request.method == "GET":
         form = CarForm()
@@ -270,7 +263,6 @@ def add_new_car(request):
     return render(request, "add_or_create/add_car.html", {"car": form})
 
 
-@login_required
 def add_dealership(request):
     if request.method == "GET":
         form = DealershipForm()
@@ -326,9 +318,7 @@ def get_all_dealership(request):
 
     search_query = request.GET.get("search", "")
     if search_query:
-        dealership_list = dealership_list.filter(
-            Q(name=search_query)
-        )
+        dealership_list = dealership_list.filter(Q(name=search_query))
 
     page = request.GET.get("page", 1)
     paginator = Paginator(dealership_list, 36)
@@ -341,5 +331,9 @@ def get_all_dealership(request):
     return render(
         request,
         "show_or_get/all_dealers.html",
-        {"dealer_list": dealership_list, "dealers": dealers, "search_query": search_query},
+        {
+            "dealer_list": dealership_list,
+            "dealers": dealers,
+            "search_query": search_query,
+        },
     )

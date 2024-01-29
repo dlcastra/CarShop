@@ -79,11 +79,9 @@ class CreateOrderView(
         car_type = car.car_type
         dealership = car_type.dealerships.first()
 
-        order = Order.objects.filter(
-            client=client, dealership=dealership, is_paid=False
-        ).first()
+        order = Order.objects.filter(client=client, is_paid=False).first()
 
-        if not order or order.is_paid:
+        if not order:
             order = Order.objects.create(
                 client=client, dealership=dealership, is_paid=False
             )
