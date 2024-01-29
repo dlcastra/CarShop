@@ -114,8 +114,8 @@ class CartView(generics.ListAPIView, generics.RetrieveAPIView, GenericViewSet):
                 car.owner = client
                 car.save()
 
-            create_invoice(order, "https://webhook.site/ed779803-195e-4d54-88e6-6036da3be51e")
-            # create_invoice(order, reverse("webhook-mono", request=request))
+            # create_invoice(order, "https://webhook.site/ed779803-195e-4d54-88e6-6036da3be51e")
+            create_invoice(order, reverse("webhook-mono", request=request))
             return Response(
                 {"invoice": order.invoice_url, "message": "Your invoice"},
                 status=status.HTTP_200_OK,
