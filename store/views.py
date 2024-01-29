@@ -158,9 +158,6 @@ def view_cart(request):
         )
 
 
-# TODO:
-#  1. Добавить отдельные кнопки для каждого отдельного заказа.
-#  2. Добавить логику которая будет убирать оплоченый заказ из корзины
 @login_required
 def pay_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
