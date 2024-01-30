@@ -4,6 +4,30 @@ info:
   version: 1.0.0
 
 paths:
+  /api/api-token-auth/:
+    post:
+      summary: Create user token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              username: name
+              password: password
+
+      responses:
+        '201':
+          description: A successful response
+          content:
+            application/json:
+              example:
+                - id: 1
+                  car_type: 1
+                  color: "SomeColor"
+                  "year": 2024
+                  "image": "https://example.s3.amazonaws.com"
+
+
   /api/cars-api:
     get:
       summary: Get a list of cars
