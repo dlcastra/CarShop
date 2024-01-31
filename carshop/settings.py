@@ -227,7 +227,7 @@ SOCIALACCOUNT_PROVIDERS = {
             "email",
         ],
         "AUTH_PARAMS": {
-            "access_type": "online",
+            "access_type": "offline",
         },
         "OAUTH_PKCE_ENABLED": True,
     }
