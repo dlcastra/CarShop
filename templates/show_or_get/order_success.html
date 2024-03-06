@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Сторінка оплати</title>
+    <title>Payment page</title>
 </head>
 {% load bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 <body>
-<h1>Cплатити замовлення</h1>
-<p>Ваше замовлення було успішно сплачене.</p>
+<h1>Pay order</h1>
+<p>Your order has been successfully paid.</p>
 <form method="GET" action="{% url 'view_cart' %}">
     {% csrf_token %}
     {% buttons %}
-        <input type="submit" class="btn btn-success" name="redirect_on_store_page" value="Назад до магазину">
+        <input type="submit" class="btn btn-success" name="redirect_on_store_page" value="Back to the store">
     {% endbuttons %}
 </form>
 </body>

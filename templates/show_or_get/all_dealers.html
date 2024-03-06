@@ -9,7 +9,7 @@
         <form method="get" action="{% url 'get_all_dealership' %}" class="search-form">
             <div class="input-group mb-3">
                 <input type="text" class="form-control" name="search" placeholder="По назві" value="{{ search_query }}">
-                <button class="btn btn-secondary" type="submit">Шукати</button>
+                <button class="btn btn-secondary" type="submit">Search</button>
             </div>
         </form>
     </div>
@@ -17,25 +17,25 @@
         {% for dealer in dealer_list %}
             <li>
                 <strong>{{ dealer.name }}</strong><br>
-                <em>Доступні Автомобілі:</em>
+                <em>Available Cars:</em>
                 <ul>
                     {% for car in dealer.available_car_types.all %}
                         <li>
                             {{ car.brand }} {{ car.name }}<br>
-                            <em>Ціна: ${{ car.price }}</em>
+                            <em>Price: ${{ car.price }}</em>
                         </li>
                     {% endfor %}
                 </ul>
             </li>
             <p></p>
         {% empty %}
-            <p>Наразі немає доступних дилерів.</p>
+            <p>No dealers are currently available.</p>
         {% endfor %}
     <div class="pagination">
         <span class="step-links">
             {% if cars.has_previous %}
-                <a href="?page=1" class="btn btn-secondary">&laquo; Перша</a>
-                <a href="?page={{ cars.previous_page_number }}" class="btn btn-secondary">Попередня</a>
+                <a href="?page=1" class="btn btn-secondary">&laquo; First</a>
+                <a href="?page={{ cars.previous_page_number }}" class="btn btn-secondary">Previous</a>
             {% endif %}
 
             <span class="current btn btn-light">
@@ -43,8 +43,8 @@
             </span>
 
             {% if cars.has_next %}
-                <a href="?page={{ dealers.next_page_number }}" class="btn btn-secondary">Наступна</a>
-                <a href="?page={{ dealers.paginator.num_pages }}" class="btn btn-secondary">Остання &raquo;</a>
+                <a href="?page={{ dealers.next_page_number }}" class="btn btn-secondary">Next</a>
+                <a href="?page={{ dealers.paginator.num_pages }}" class="btn btn-secondary">last &raquo;</a>
             {% endif %}
             <p></p>
         </span>

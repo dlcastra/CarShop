@@ -61,18 +61,18 @@
     </div>
 </form>
 <div class="container cars-container">
-    <h1>Доступні Автомобілі</h1>
+    <h1>Available Cars</h1>
     <h1></h1>
     <div class="search-form-container">
         <form method="get" action="{% url 'redirect_on_store_page' %}" class="search-form">
             <div class="input-group mb-3">
-                <input type="text" class="form-control" name="search" placeholder="По назві" value="{{ search_query }}">
-                <button class="btn btn-secondary" type="submit">Шукати</button>
+                <input type="text" class="form-control" name="search" placeholder="By name" value="{{ search_query }}">
+                <button class="btn btn-secondary" type="submit">Search</button>
             </div>
             <div class="input-group mb-3">
-                <input type="text" class="form-control" name="year" placeholder="По даті випуску"
+                <input type="text" class="form-control" name="year" placeholder="By year of release"
                        value="{{ year_query }}">
-                <button class="btn btn-secondary" type="submit">Шукати</button>
+                <button class="btn btn-secondary" type="submit">Search</button>
             </div>
         </form>
     </div>
@@ -84,10 +84,10 @@
                     <div class="card-body">
                         <strong>{{ car.car_type.brand }} {{ car.car_type.name }}</strong><br>
                         <em>ID: {{ car.id }}</em><br>
-                        <em>Рік випуску: {{ car.year }}</em><br>
-                        <em>Колір: {{ car.color }}</em><br>
-                        <em>Ціна: ${{ car.car_type.price }}</em><br>
-                        <em>Ділер: {{ car.car_type.dealerships.first.name }}</em>
+                        <em>Year of release: {{ car.year }}</em><br>
+                        <em>Color: {{ car.color }}</em><br>
+                        <em>Price: ${{ car.car_type.price }}</em><br>
+                        <em>Dealer: {{ car.car_type.dealerships.first.name }}</em>
                         {% csrf_token %}
 
                         {% if car.image %}
@@ -103,20 +103,20 @@
                         <form method="POST" action="{% url 'create_order' car.id %}">
                             {% csrf_token %}
                             {% buttons %}
-                                <input type="submit" class="btn btn-outline-success" name="buy_car" value="Купити">
+                                <input type="submit" class="btn btn-outline-success" name="buy_car" value="Buy">
                             {% endbuttons %}
                         </form>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <p>На даний момент немає доступних автомобілів.</p>
+            <p>There are no cars available at the moment.</p>
         {% endfor %}
         <div class="pagination">
         <span class="step-links">
             {% if cars.has_previous %}
-                <a href="?page=1" class="btn btn-secondary">&laquo; Перша</a>
-                <a href="?page={{ cars.previous_page_number }}" class="btn btn-secondary">Попередня</a>
+                <a href="?page=1" class="btn btn-secondary">&laquo; First</a>
+                <a href="?page={{ cars.previous_page_number }}" class="btn btn-secondary">Previous</a>
             {% endif %}
 
             <span class="current btn btn-light">
@@ -124,8 +124,8 @@
             </span>
 
             {% if cars.has_next %}
-                <a href="?page={{ cars.next_page_number }}" class="btn btn-secondary">Наступна</a>
-                <a href="?page={{ cars.paginator.num_pages }}" class="btn btn-secondary">Остання &raquo;</a>
+                <a href="?page={{ cars.next_page_number }}" class="btn btn-secondary">Next</a>
+                <a href="?page={{ cars.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
             {% endif %}
             <p></p>
         <p></p>
